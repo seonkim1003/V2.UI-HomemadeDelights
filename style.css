@@ -1,5 +1,5 @@
 /* --- Fonts and Basic Setup --- */
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Bodoni:ital,wght@0,400..700;1,400..700&display=swap');
 
 :root {
     --primary-color: #8d7b80; /* A darker, complementary shade */
@@ -7,7 +7,7 @@
     --accent-color: #c3b8bc; /* Your logo color! */
     --light-accent-bg: #f5f1f2; /* A very light version of your accent */
     --text-color: #4a4a4a;
-    --heading-font: 'Pacifico', cursive; /* Cute, script-like font */
+    --heading-font: 'Libre Bodoni', serif; /* Cute, script-like font */
     --body-font: 'Quicksand', sans-serif; /* Soft, rounded, friendly font */
 }
 
