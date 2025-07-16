@@ -173,12 +173,15 @@ nav ul li a.active::after {
     border: 2px solid transparent;
 }
 .btn-primary {
+    /* --- THE FIX for readability --- */
     background-color: var(--accent-color);
-    color: var(--primary-color);
+    color: #4a3e42; /* Darker text color for contrast */
+    text-shadow: 0px 1px 1px rgba(255,255,255,0.5);
 }
 .btn-primary:hover {
     background-color: var(--primary-color);
     color: var(--secondary-color);
+    text-shadow: none;
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
@@ -404,7 +407,6 @@ footer p {
         width: 100%;
     }
     nav ul li a { 
-        /* --- THE FIX for mobile nav --- */
         padding: 8px 9px; 
         font-size: 0.9rem;
     }
