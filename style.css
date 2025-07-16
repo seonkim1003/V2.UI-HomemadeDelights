@@ -223,7 +223,15 @@ nav ul li a.active::after {
     transform: translateY(-10px);
     box-shadow: 0 10px 25px rgba(195, 184, 188, 0.4);
 }
-.social-card h3 { font-size: 2.5rem; margin-bottom: 10px; }
+.social-card img {
+    height: 50px;
+    width: auto;
+    margin-bottom: 10px;
+}
+.social-card h3 { 
+    font-size: 2.2rem; 
+    margin-bottom: 10px; 
+}
 
 /* --- About Page --- */
 .founder-note {
@@ -264,26 +272,26 @@ nav ul li a.active::after {
     margin-top: 5px;
     margin-bottom: 10px;
 }
-.where-profits-go {
+.impact-section {
     text-align: center;
 }
-.where-profits-go ul {
+.impact-section ul {
     list-style: none;
     padding: 0;
-    margin: 20px 0;
+    margin-top: 0;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
 }
-.where-profits-go li {
+.impact-section li {
     background: var(--light-accent-bg);
     padding: 10px 20px;
     border-radius: 50px;
     font-weight: 500;
     transition: all 0.3s;
 }
-.where-profits-go li:hover {
+.impact-section li:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
     transform: scale(1.05);
@@ -391,8 +399,15 @@ footer p {
         padding-bottom: 15px;
     }
     .nav-logo { margin-bottom: 15px; }
-    nav ul { flex-wrap: wrap; justify-content: center; }
-    nav ul li a { padding: 8px 12px; font-size: 0.95rem; }
+    nav ul { 
+        justify-content: center;
+        width: 100%;
+    }
+    nav ul li a { 
+        /* --- THE FIX for mobile nav --- */
+        padding: 8px 9px; 
+        font-size: 0.9rem;
+    }
 
     .page-section { padding: 60px 0; }
     h2 { font-size: 2.8rem; }
