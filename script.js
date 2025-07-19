@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Banner Functionality ---
+    const banner = document.getElementById('promo-banner');
+    const closeBannerBtn = document.getElementById('close-banner');
+    
+    if (banner && closeBannerBtn) {
+        closeBannerBtn.addEventListener('click', function() {
+            banner.style.display = 'none';
+        });
+    }
 
     // --- Fade-in on Scroll Animation ---
     const faders = document.querySelectorAll('.fade-in');
