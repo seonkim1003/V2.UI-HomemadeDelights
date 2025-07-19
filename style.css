@@ -7,7 +7,7 @@
     --accent-color: #c3b8bc; /* Your logo color! */
     --light-accent-bg: #f5f1f2; /* A very light version of your accent */
     --text-color: #4a4a4a;
-    --heading-font: 'Comic Relief', system-ui; /* Cute, script-like font */
+    --heading-font: 'Comic+Relief', system-ui; /* Cute, script-like font */
     --body-font: 'Quicksand', sans-serif; /* Soft, rounded, friendly font */
 }
 
@@ -54,6 +54,48 @@ p { margin-bottom: 1.2rem; }
     font-size: 1.1rem;
     max-width: 700px;
     margin: 0 auto 40px auto;
+}
+
+/* --- NEW: Banner Styles --- */
+.banner {
+    background-color: var(--primary-color);
+    color: var(--light-accent-bg);
+    padding: 10px 20px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: var(--body-font);
+    font-weight: 500;
+}
+.banner p { 
+    margin: 0; 
+}
+.banner a { 
+    color: var(--secondary-color); 
+    font-weight: 700; 
+    text-decoration: underline; 
+    margin-left: 10px;
+    transition: color 0.3s;
+}
+.banner a:hover {
+    color: var(--accent-color);
+}
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    line-height: 1;
+    transition: color 0.3s;
+}
+.close-btn:hover {
+    color: var(--accent-color);
 }
 
 /* --- Navigation --- */
