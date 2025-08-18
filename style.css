@@ -118,22 +118,24 @@ nav {
     color: var(--primary-color);
     font-family: var(--heading-font);
     font-size: 1.5rem;
+    position: relative;
+    z-index: 1001; /* Ensure logo is above mobile menu */
 }
 .nav-logo img {
     height: 50px;
-    margin-right: 10px; /* MODIFIED: Reduced from 15px */
+    margin-right: 10px;
     transition: transform 0.4s ease;
 }
 .nav-logo:hover img {
     transform: rotate(360deg);
 }
-nav ul {
+.nav-links {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
 }
-nav ul li a {
+.nav-links li a {
     padding: 20px 15px;
     text-decoration: none;
     color: var(--text-color);
@@ -142,26 +144,28 @@ nav ul li a {
     transition: color 0.3s;
     white-space: nowrap;
 }
-nav ul li a::after {
+.nav-links li a::after {
     content: '';
     position: absolute;
     width: 0;
     height: 3px;
     background: var(--accent-color);
     border-radius: 2px;
-    bottom: 8px; /* MODIFIED: Reduced from 10px */
+    bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
     transition: width 0.3s ease-out;
 }
-nav ul li a:hover,
-nav ul li a.active {
+.nav-links li a:hover,
+.nav-links li a.active {
     color: var(--primary-color);
 }
-nav ul li a:hover::after,
-nav ul li a.active::after {
+.nav-links li a:hover::after,
+.nav-links li a.active::after {
     width: 60%;
 }
+
+.nav-toggle { display: none; } /* Hide hamburger by default */
 
 /* --- Hero Section --- */
 .hero {
@@ -280,37 +284,38 @@ nav ul li a.active::after {
 
 /* --- About Page --- */
 .founder-spotlight {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Image | Text */
     align-items: center;
     gap: 50px;
-    background: #e9e4e6;
-    padding: 50px;
-    border-radius: 20px;
     margin-bottom: 80px;
 }
-.founder-image {
-    flex-shrink: 0;
-    text-align: center;
-}
 .founder-image img {
-    width: 250px;
-    height: 250px;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 50%;
     border: 5px solid var(--secondary-color);
     box-shadow: 0 5px 20px rgba(195, 184, 188, 0.5);
+    display: block;
+    margin: 0 auto;
 }
-.founder-details .member-info h3,
-.founder-details .member-info h4,
-.founder-details .member-info p {
+.founder-details .member-info h3 {
+    text-align: left;
+    font-size: 3rem;
+}
+.founder-details .member-info h4 {
     text-align: left;
 }
+.founder-details .member-info p {
+    text-align: left;
+    margin-bottom: 25px;
+}
 .founder-note {
-    background: none;
     border-left: 4px solid var(--accent-color);
     padding-left: 20px;
-    margin-top: 25px;
     font-style: italic;
 }
 .founder-note h3 {
@@ -321,25 +326,24 @@ nav ul li a.active::after {
 .founder-note p {
     margin-bottom: 0;
 }
-
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 50px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
 }
 .team-member {
     text-align: center;
 }
 .team-member img {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 180px;
     object-fit: cover;
     border-radius: 50%;
     border: 5px solid var(--secondary-color);
     box-shadow: 0 5px 20px rgba(195, 184, 188, 0.5);
     margin-bottom: 20px;
 }
-.member-info h3 { font-size: 2.8rem; margin-bottom: 0; }
+.member-info h3 { font-size: 2.5rem; margin-bottom: 0; }
 .member-info h4 {
     font-family: var(--body-font);
     font-size: 1rem;
@@ -467,23 +471,62 @@ footer p {
 
 /* --- RESPONSIVE DESIGN --- */
 
-/* For Tablets */
+/* For Tablets and Below */
 @media (max-width: 768px) {
-    nav {
-        flex-direction: column;
-        padding-top: 15px;
-        padding-bottom: 15px;
-    }
-    .nav-logo { margin-bottom: 15px; }
-    nav ul { 
-        justify-content: center;
+    .nav-links {
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 100%;
-        flex-wrap: wrap; /* Allow nav items to wrap */
-        gap: 0 10px; /* Add horizontal gap between wrapped items */
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        transform: translateX(100%);
+        transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        z-index: 1000;
     }
-    nav ul li a { 
-        padding: 8px 9px; 
-        font-size: 0.9rem;
+    .nav-links.nav-open {
+        transform: translateX(0);
+    }
+    .nav-links li a {
+        font-size: 2rem;
+        padding: 15px;
+    }
+    .nav-links li a::after {
+        bottom: 0;
+    }
+    .nav-toggle {
+        display: block;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 1001;
+        position: relative;
+        width: 30px;
+        height: 22px;
+    }
+    .hamburger, .hamburger::before, .hamburger::after {
+        content: '';
+        position: absolute;
+        background-color: var(--primary-color);
+        height: 3px;
+        width: 30px;
+        border-radius: 2px;
+        transition: all 0.3s ease-in-out;
+    }
+    .hamburger { top: 10px; }
+    .hamburger::before { top: -10px; }
+    .hamburger::after { top: 10px; }
+    .nav-toggle.is-active .hamburger { background: transparent; }
+    .nav-toggle.is-active .hamburger::before {
+        transform: rotate(45deg) translate(5px, 8px);
+    }
+    .nav-toggle.is-active .hamburger::after {
+        transform: rotate(-45deg) translate(5px, -8px);
     }
 
     .page-section { padding: 60px 0; }
@@ -491,10 +534,9 @@ footer p {
     .hero h1 { font-size: 3.5rem; }
     .hero p { font-size: 1.1rem; }
     .btn-secondary { margin-left: 0; margin-top: 15px; }
-    
+
     .founder-spotlight {
-        flex-direction: column;
-        padding: 40px 30px;
+        grid-template-columns: 1fr;
         gap: 30px;
     }
     .founder-details .member-info h3,
@@ -506,10 +548,7 @@ footer p {
         grid-template-columns: 1fr;
     }
 
-    /* Adjust form height for tablets */
-    .form-container {
-        height: 750px;
-    }
+    .form-container { height: 750px; }
 }
 
 /* For Mobile Phones */
@@ -529,21 +568,18 @@ footer p {
     .btn-secondary { margin-left: 0; margin-top: 15px; }
     
     h2 {
-        font-size: 2.5rem; /* MODIFIED: Reduced size for mobile */
-        line-height: 1.3; /* MODIFIED: Added to control spacing on wrap */
+        font-size: 2.5rem;
+        line-height: 1.3;
     }
-
     .hero h1 { 
         font-size: 2.8rem;
-        line-height: 1.2; /* MODIFIED: Added to fix line spacing */
+        line-height: 1.2;
     }
     
+    .team-grid { grid-template-columns: 1fr; }
     .team-member img { width: 150px; height: 150px; }
     
     .menu-grid { grid-template-columns: 1fr; }
 
-    /* Adjust form height for smaller mobiles */
-    .form-container {
-        height: 850px;
-    }
+    .form-container { height: 850px; }
 }
