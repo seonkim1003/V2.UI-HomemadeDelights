@@ -13,6 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.querySelector('.nav-toggle');
     const navLinks = document.querySelector('.nav-links');
 
+    // Add transition class after a short delay to prevent animation on page load
+    setTimeout(() => {
+        if (navLinks) {
+            navLinks.classList.add('transition-ready');
+        }
+    }, 100);
+
     if (navToggle && navLinks) {
         navToggle.addEventListener('click', () => {
             navLinks.classList.toggle('nav-open');
