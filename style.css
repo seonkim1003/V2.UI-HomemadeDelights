@@ -291,6 +291,18 @@ nav ul li a.active::after {
     font-size: 2.5rem;
     margin-bottom: 15px;
 }
+.founder-container {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 60px auto;
+}
+.founder-container .team-member {
+    max-width: 450px;
+}
+.founder-container .team-member img {
+    width: 250px;
+    height: 250px;
+}
 .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
