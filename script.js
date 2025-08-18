@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         navToggle.addEventListener('click', () => {
             navLinks.classList.toggle('nav-open');
             navToggle.classList.toggle('is-active');
+            document.body.classList.toggle('body-no-scroll');
         });
 
         // Close menu when a link is clicked
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
             link.addEventListener('click', () => {
                 navLinks.classList.remove('nav-open');
                 navToggle.classList.remove('is-active');
+                document.body.classList.remove('body-no-scroll');
             });
         });
     }
