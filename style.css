@@ -24,6 +24,9 @@ body {
     flex-direction: column;
     min-height: 100vh;
 }
+body.body-no-scroll {
+    overflow: hidden;
+}
 
 main { flex-grow: 1; }
 
@@ -103,7 +106,7 @@ nav {
     background-color: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--light-accent-bg);
-    padding: 10px 5%;
+    padding: 10px 6%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -514,21 +517,25 @@ footer p {
     .hamburger, .hamburger::before, .hamburger::after {
         content: '';
         position: absolute;
+        left: 0;
         background-color: var(--primary-color);
         height: 3px;
         width: 30px;
         border-radius: 2px;
-        transition: all 0.3s ease-in-out;
+        transition: transform 0.3s ease-in-out, top 0.3s ease-in-out, background-color 0.3s ease-in-out;
     }
-    .hamburger { top: 10px; }
+    .hamburger { top: 50%; transform: translateY(-50%); }
     .hamburger::before { top: -10px; }
     .hamburger::after { top: 10px; }
-    .nav-toggle.is-active .hamburger { background: transparent; }
+
+    .nav-toggle.is-active .hamburger { background-color: transparent; }
     .nav-toggle.is-active .hamburger::before {
-        transform: rotate(45deg) translate(5px, 8px);
+        top: 0;
+        transform: rotate(45deg);
     }
     .nav-toggle.is-active .hamburger::after {
-        transform: rotate(-45deg) translate(5px, -8px);
+        top: 0;
+        transform: rotate(-45deg);
     }
 
     .page-section { padding: 60px 0; }
