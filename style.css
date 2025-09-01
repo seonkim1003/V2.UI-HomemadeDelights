@@ -292,6 +292,10 @@ nav {
     align-items: center;
     gap: 50px;
     margin-bottom: 80px;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.07);
 }
 .founder-image img {
     width: 100%;
@@ -314,39 +318,50 @@ nav {
 }
 .founder-details .member-info p {
     text-align: left;
-    margin-bottom: 25px;
-}
-.founder-note {
-    border-left: 4px solid var(--accent-color);
-    padding-left: 20px;
-    font-style: italic;
-}
-.founder-note h3 {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-    font-style: normal;
-}
-.founder-note p {
     margin-bottom: 0;
 }
+
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr; /* Each member gets their own row */
     gap: 40px;
 }
-.team-member {
-    text-align: center;
+
+.team-member-box {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+    padding: 40px;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
-.team-member img {
+
+.team-member-box:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(195, 184, 188, 0.4);
+}
+
+.team-member-content {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.team-member-box img {
     width: 180px;
     height: 180px;
     object-fit: cover;
     border-radius: 50%;
     border: 5px solid var(--secondary-color);
     box-shadow: 0 5px 20px rgba(195, 184, 188, 0.5);
-    margin-bottom: 20px;
 }
-.member-info h3 { font-size: 2.5rem; margin-bottom: 0; }
+
+.member-info h3 {
+    font-size: 2.5rem;
+    margin-bottom: 0;
+    text-align: left;
+}
+
 .member-info h4 {
     font-family: var(--body-font);
     font-size: 1rem;
@@ -354,7 +369,15 @@ nav {
     color: var(--accent-color);
     margin-top: 5px;
     margin-bottom: 10px;
+    text-align: left;
 }
+
+.member-info p {
+    text-align: left;
+    margin-bottom: 0;
+}
+
+
 .impact-section {
     text-align: center;
 }
@@ -475,6 +498,25 @@ footer p {
 /* --- RESPONSIVE DESIGN --- */
 
 /* For Tablets and Below */
+@media (max-width: 992px) {
+    .founder-spotlight, .team-member-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .founder-image img, .team-member-box img {
+        margin: 0 auto 30px auto;
+    }
+    .founder-details .member-info h3,
+    .founder-details .member-info h4,
+    .founder-details .member-info p,
+    .member-info h3,
+    .member-info h4,
+    .member-info p {
+        text-align: center;
+    }
+}
+
+
 @media (max-width: 768px) {
     .nav-links {
         position: fixed;
@@ -548,11 +590,7 @@ footer p {
         grid-template-columns: 1fr;
         gap: 30px;
     }
-    .founder-details .member-info h3,
-    .founder-details .member-info h4,
-    .founder-details .member-info p {
-        text-align: center;
-    }
+    
     .team-grid {
         grid-template-columns: 1fr;
     }
