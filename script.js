@@ -181,4 +181,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // --- Team Card Flip Functionality ---
+    const teamMembers = document.querySelectorAll('.team-grid .team-member');
+    
+    const handleFlip = (member) => {
+        member.classList.toggle('is-flipped');
+    };
+
+    teamMembers.forEach(member => {
+        member.addEventListener('click', () => handleFlip(member));
+        member.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault(); // Prevent page scroll on spacebar press
+                handleFlip(member);
+            }
+        });
+    });
+
 });
