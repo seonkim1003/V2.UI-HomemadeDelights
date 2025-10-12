@@ -286,121 +286,147 @@ nav {
 }
 
 /* --- About Page --- */
-.founder-spotlight {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr; /* Image | Text */
-    align-items: center;
-    gap: 50px;
-    margin-bottom: 80px;
-    background-color: #fff;
-    padding: 40px;
+
+.mission-statement {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: var(--light-accent-bg);
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+    margin-bottom: 80px;
 }
-.founder-image img {
-    width: 100%;
-    max-width: 300px;
-    height: auto;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 5px solid var(--secondary-color);
-    box-shadow: 0 5px 20px rgba(195, 184, 188, 0.5);
-    display: block;
+
+.mission-statement h2 {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.mission-statement p {
+    font-size: 1.3rem;
+    max-width: 800px;
     margin: 0 auto;
 }
-.founder-details .member-info h3 {
-    text-align: left;
-    font-size: 3rem;
-}
-.founder-details .member-info h4 {
-    text-align: left;
-}
-.founder-details .member-info p {
-    text-align: left;
-    margin-bottom: 0;
-}
 
-.team-grid {
+.team-grid-new {
     display: grid;
-    grid-template-columns: 1fr; /* Each member gets their own row */
-    gap: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
 }
 
-.team-member-box {
-    background-color: #fff;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.07);
-    padding: 40px;
+.team-member-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    text-align: center;
+    padding: 30px;
     transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.team-member-box:hover {
+.team-member-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(195, 184, 188, 0.4);
+    box-shadow: 0 12px 35px rgba(195, 184, 188, 0.5);
 }
 
-.team-member-content {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 40px;
-    align-items: center;
-}
-
-.team-member-box img {
-    width: 180px;
-    height: 180px;
-    object-fit: cover;
+.team-member-card img {
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
     border: 5px solid var(--secondary-color);
-    box-shadow: 0 5px 20px rgba(195, 184, 188, 0.5);
+    box-shadow: 0 5px 15px rgba(195, 184, 188, 0.4);
 }
 
-.member-info h3 {
-    font-size: 2.5rem;
-    margin-bottom: 0;
-    text-align: left;
-}
-
-.member-info h4 {
-    font-family: var(--body-font);
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-top: 5px;
-    margin-bottom: 10px;
-    text-align: left;
-}
-
-.member-info p {
-    text-align: left;
-    margin-bottom: 0;
-}
-
-
-.impact-section {
+.team-member-card h3 {
+    font-size: 2rem;
     text-align: center;
 }
-.impact-section ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 0;
+
+.team-member-card h4 {
+    font-family: var(--body-font);
+    font-size: 1rem;
+    color: var(--accent-color);
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.team-member-card p {
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.impact-section-lifted {
+    padding: 80px 0;
+    position: relative;
+    z-index: 10;
+    margin-top: -50px; /* Pulls the section up */
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+}
+
+/* --- Gallery Carousel --- */
+.gallery-carousel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.carousel-track {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
+    transition: transform 0.5s ease-in-out;
 }
-.impact-section li {
-    background: var(--light-accent-bg);
-    padding: 10px 20px;
-    border-radius: 50px;
+
+.carousel-slide {
+    min-width: 100%;
+    position: relative;
+}
+
+.carousel-slide img {
+    width: 100%;
+    display: block;
+    height: 500px; /* Or adjust as needed */
+    object-fit: cover;
+}
+
+.carousel-slide .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+    font-family: var(--body-font);
     font-weight: 500;
-    transition: all 0.3s;
 }
-.impact-section li:hover {
-    background-color: var(--accent-color);
-    color: var(--primary-color);
-    transform: scale(1.05);
+
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+    font-size: 2rem;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 100;
+    width: 50px;
+    height: 50px;
+    line-height: 30px;
+    transition: background-color 0.3s;
+}
+.carousel-button:hover {
+    background-color: #fff;
+}
+.carousel-button.prev {
+    left: 15px;
+}
+.carousel-button.next {
+    right: 15px;
 }
 
 /* --- Menu/Donate Page --- */
