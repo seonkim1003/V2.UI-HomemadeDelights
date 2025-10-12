@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Homemade Delights</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="assets/logo.png" type="image/png">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>About Us - Homemade Delights</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" href="assets/logo.png" type="image/png">
+    </head>
 <body>
-
     <!-- Navigation Bar -->
     <nav>
         <a href="index.html" class="nav-logo">
@@ -26,28 +25,36 @@
             <span class="hamburger"></span>
         </button>
     </nav>
-
+    
     <!-- Main Content -->
     <main>
-        <section class="page-section">
+        <!-- About Hero Section -->
+        <section class="about-hero">
             <div class="container">
-                <div class="mission-statement">
-                    <h2>Our Mission</h2>
-                    <p>Homemade Delights aims to make Mental Health support as accessible as possible and spread awareness around the globe.</p>
-                </div>
-
-                <h2>Our Story & Founder</h2>
-                
-                <!-- Founder Spotlight Layout -->
-                <div class="founder-spotlight">
+                <h2>OUR MISSION</h2>
+                <p>To make Mental Health support as accessible as possible and spread awareness around the globe.</p>
+            </div>
+        </section>
+    
+        <!-- Founder Section -->
+        <section class="page-section">
+            <div class="container founder-section">
+                <div class="founder-image">
                     <img src="assets/team/tevyn.jpeg" alt="Tevyn Yong">
+                </div>
+                <div class="founder-bio">
+                    <h2>Our Story & Founder</h2>
                     <h3>Tevyn Yong</h3>
                     <h4>Founder, Product Management</h4>
                     <p>Homemade Delights was started because when I was in middle school, I had many personal friends who struggled with mental health problems. While they were suffering, they were not able to get the help that they needed. So, Homemade Delights was created to reach out and offer support to people who are in need of it. We want to build a community where asking for help is as easy as sharing a cookie.</p>
                 </div>
-                
-                <h2 style="margin-top: 80px;">Meet The Team</h2>
-                <!-- Team Grid -->
+            </div>
+        </section>
+        
+        <!-- Team Section -->
+        <section class="page-section alt-bg">
+            <div class="container">
+                <h2>Meet The Team</h2>
                 <div class="team-grid">
                     <!-- Brandon Baek -->
                     <div class="team-member">
@@ -80,12 +87,12 @@
                 </div>
             </div>
         </section>
-
-        <section class="page-section alt-bg fade-in">
+        
+        <!-- Carousel Section -->
+        <section class="page-section fade-in">
             <div class="container">
                 <h2>Our Journey in Photos</h2>
-                <p class="section-intro">A glimpse into what we do.</p>
-                <p class="section-intro">👆 Click any photo to see it larger.</p>
+                <p class="section-intro">A glimpse into what we do. Click any photo to see it larger.</p>
                 
                 <div class="carousel-container">
                     <div class="carousel-viewport">
@@ -128,17 +135,20 @@
                 <button class="lightbox-next" id="lightbox-next">&rarr;</button>
             </div>
         </div>
-
+    
         <section class="page-section alt-bg">
             <div class="container">
                 <div class="impact-section">
                     <h2>How We Make an Impact</h2>
                     <p class="section-intro">Our mission is multifaceted. We focus on direct action, education, and financial support to make the greatest possible impact on mental health awareness.</p>
+                    
+                    <h4>Our Methods</h4>
                     <ul>
                         <li>Spreading Awareness on Mental Health</li>
                         <li>Posting Educational Social Media Content</li>
                     </ul>
-                    <p class="section-intro" style="margin-top: 40px;">Additionally, all our profits are donated to incredible organizations on the front lines of mental health and community support, including:</p>
+    
+                    <h4>Organizations We Support</h4>
                      <ul>
                         <li>Rise Above the Disorder</li>
                         <li>988 Hotline</li>
@@ -151,12 +161,12 @@
             </div>
         </section>
     </main>
-
+    
     <!-- Footer -->
     <footer>
         <p>© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates</p>
     </footer>
-
+    
     <script src="script.js"></script>
 </body>
 </html>
