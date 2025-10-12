@@ -80,25 +80,36 @@
             <div class="container">
                 <h2>Our Journey in Photos</h2>
                 <p class="section-intro">A glimpse into our events, baking sessions, and community moments. Click any photo to see it larger.</p>
-                <div class="gallery-grid">
-                    <!-- TO ADD A NEW IMAGE: Just copy the line below. Change the image path in both places and update the alt text and caption. -->
-                    <a href="assets/pictures/packingboxes.jpg" class="gallery-item" data-caption="Baking for a cause.">
-                        <img src="assets/pictures/packingboxes.jpg" alt="Selling baked goods">
-                        <figcaption>Selling baked goods</figcaption>
-                    </a>
-                    <a href="assets/pictures/saturdaywork.jpeg" class="gallery-item" data-caption="Working hard at a regular Saturday work meeting.">
-                        <img src="assets/pictures/saturdaywork.jpeg" alt="Regular meeting">
-                        <figcaption>Regular meeting</figcaption>
-                    </a>
-                    <a href="assets/pictures/surveyaward.jpg" class="gallery-item" data-caption="Won an award for a survey competition hosted by Next Generation Advocates.">
-                        <img src="assets/pictures/surveyaward.jpg" alt="Survey award">
-                        <figcaption>Survey competition award</figcaption>
-                    </a>
-                    <a href="assets/pictures/makingboxes.jpeg" class="gallery-item" data-caption="Making boxes to pack our product.">
-                        <img src="assets/pictures/makingboxes.jpeg" alt="Making boxes">
-                        <figcaption>Making boxes</figcaption>
-                    </a>
+                
+                <div class="carousel-container">
+                    <div class="carousel-viewport">
+                        <div class="carousel-track">
+                            <!-- Slide 1 -->
+                            <div class="carousel-slide">
+                                <img src="assets/pictures/packingboxes.jpg" alt="Selling baked goods" data-large-src="assets/pictures/packingboxes.jpg" data-caption="Baking for a cause.">
+                                <figcaption>Selling baked goods</figcaption>
+                            </div>
+                            <!-- Slide 2 -->
+                            <div class="carousel-slide">
+                                <img src="assets/pictures/saturdaywork.jpeg" alt="Regular meeting" data-large-src="assets/pictures/saturdaywork.jpeg" data-caption="Working hard at a regular Saturday work meeting.">
+                                <figcaption>Regular meeting</figcaption>
+                            </div>
+                            <!-- Slide 3 -->
+                            <div class="carousel-slide">
+                                <img src="assets/pictures/surveyaward.jpg" alt="Survey award" data-large-src="assets/pictures/surveyaward.jpg" data-caption="Won an award for a survey competition hosted by Next Generation Advocates.">
+                                <figcaption>Survey competition award</figcaption>
+                            </div>
+                            <!-- Slide 4 -->
+                            <div class="carousel-slide">
+                                <img src="assets/pictures/makingboxes.jpeg" alt="Making boxes" data-large-src="assets/pictures/makingboxes.jpeg" data-caption="Making boxes to pack our product.">
+                                <figcaption>Making boxes</figcaption>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-button prev" aria-label="Previous image">&larr;</button>
+                    <button class="carousel-button next" aria-label="Next image">&rarr;</button>
                 </div>
+    
             </div>
         </section>
         
