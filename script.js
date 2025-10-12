@@ -63,31 +63,80 @@ document.addEventListener('DOMContentLoaded', function() {
         appearOnScroll.observe(fader);
     });
 
-    // --- NEW & IMPROVED: Gallery Lightbox Functionality ---
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImage = document.getElementById('lightbox-image');
-    const lightboxCaption = document.getElementById('lightbox-caption');
-    const lightboxClose = document.getElementById('lightbox-close');
-    const lightboxPrev = document.getElementById('lightbox-prev');
-    const lightboxNext = document.getElementById('lightbox-next');
-
-    if (galleryItems.length > 0 && lightbox) {
-        // Create an array of objects with image sources and captions
-        const galleryData = Array.from(galleryItems).map(item => {
-            return {
-                src: item.href,
-                caption: item.dataset.caption || '' // Use data-caption attribute
-            };
-        });
+    // --- Carousel & Lightbox Functionality ---
+    const carouselTrack = document.querySelector('.carousel-track');
+    if (carouselTrack) {
+        const slides = Array.from(carouselTrack.children);
+        const nextButton = document.querySelector('.carousel-button.next');
+        const prevButton = document.querySelector('.carousel-button.prev');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxPrevBtn = document.getElementById('lightbox-prev');
+        const lightboxNextBtn = document.getElementById('lightbox-next');
 
         let currentIndex = 0;
+        let slidesPerPage = 3;
+
+        const updateSlidesPerPage = () => {
+            if (window.innerWidth <= 768) {
+                slidesPerPage = 1;
+            } else if (window.innerWidth <= 992) {
+                slidesPerPage = 2;
+            } else {
+                slidesPerPage = 3;
+            }
+        };
+
+        const updateCarousel = () => {
+            const slideWidth = slides[0].getBoundingClientRect().width;
+            carouselTrack.style.transform = 'translateX(-' + slideWidth * currentIndex + 'px)';
+            prevButton.disabled = currentIndex === 0;
+            nextButton.disabled = currentIndex >= slides.length - slidesPerPage;
+        };
+        
+        nextButton.addEventListener('click', () => {
+            if (currentIndex < slides.length - slidesPerPage) {
+                currentIndex++;
+                updateCarousel();
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCarousel();
+            }
+        });
+        
+        window.addEventListener('resize', () => {
+            updateSlidesPerPage();
+            if (currentIndex > slides.length - slidesPerPage) {
+                 currentIndex = Math.max(0, slides.length - slidesPerPage);
+            }
+            updateCarousel();
+        });
+
+        updateSlidesPerPage();
+        updateCarousel();
+
+        // --- Lightbox Logic ---
+        const galleryData = slides.map(slide => {
+            const img = slide.querySelector('img');
+            return {
+                src: img.dataset.largeSrc,
+                caption: img.dataset.caption
+            };
+        });
+        
+        let lightboxIndex = 0;
 
         function showLightbox(index) {
             const item = galleryData[index];
             lightboxImage.src = item.src;
             lightboxCaption.textContent = item.caption;
-            currentIndex = index;
+            lightboxIndex = index;
             lightbox.classList.add('active');
             document.body.classList.add('body-no-scroll');
         }
@@ -96,38 +145,34 @@ document.addEventListener('DOMContentLoaded', function() {
             lightbox.classList.remove('active');
             document.body.classList.remove('body-no-scroll');
         }
-
+        
         function showNextImage() {
-            const newIndex = (currentIndex + 1) % galleryData.length;
-            showLightbox(newIndex);
+            lightboxIndex = (lightboxIndex + 1) % galleryData.length;
+            showLightbox(lightboxIndex);
         }
 
         function showPrevImage() {
-            const newIndex = (currentIndex - 1 + galleryData.length) % galleryData.length;
-            showLightbox(newIndex);
+            lightboxIndex = (lightboxIndex - 1 + galleryData.length) % galleryData.length;
+            showLightbox(lightboxIndex);
         }
 
-        // Add click listener to each gallery item
-        galleryItems.forEach((item, index) => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault(); // This is crucial to stop the link from navigating
+        slides.forEach((slide, index) => {
+            const img = slide.querySelector('img');
+            img.addEventListener('click', () => {
                 showLightbox(index);
             });
         });
-
-        // Add listeners for lightbox controls
-        lightboxClose.addEventListener('click', hideLightbox);
-        lightboxNext.addEventListener('click', showNextImage);
-        lightboxPrev.addEventListener('click', showPrevImage);
         
-        // Close lightbox by clicking on the background
+        if (lightboxClose) lightboxClose.addEventListener('click', hideLightbox);
+        if (lightboxNextBtn) lightboxNextBtn.addEventListener('click', showNextImage);
+        if (lightboxPrevBtn) lightboxPrevBtn.addEventListener('click', showPrevImage);
+        
         lightbox.addEventListener('click', (e) => {
             if (e.target === lightbox) {
                 hideLightbox();
             }
         });
 
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (lightbox.classList.contains('active')) {
                 if (e.key === 'Escape') hideLightbox();
