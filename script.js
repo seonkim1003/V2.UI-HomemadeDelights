@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (window.innerWidth <= 992) {
                 slidesPerPage = 2;
             } else {
-                slidesPerPage = 4;
+                slidesPerPage = 3;
             }
         };
 
