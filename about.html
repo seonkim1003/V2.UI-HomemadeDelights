@@ -75,20 +75,42 @@
                 </div>
             </div>
         </section>
-        
-        <section class="page-section alt-bg">
+
+        <section class="page-section alt-bg fade-in">
             <div class="container">
                 <h2>Our Journey in Photos</h2>
-                <p class="section-intro">A glimpse into our events, baking sessions, and community moments.</p>
+                <p class="section-intro">A glimpse into our events, baking sessions, and community moments. Click any photo to see it larger.</p>
                 <div class="gallery-grid">
-                    <!-- To add a new image, just copy a line below and change the src -->
-                    <a href="assets/pictures/gallery-1.jpg" class="gallery-item"><img src="assets/pictures/packingboxes.jpg" alt="Team working together"></a>
-                    <a href="assets/pictures/gallery-2.jpg" class="gallery-item"><img src="assets/pictures/saturdaywork.jpeg" alt="Finished baked goods"></a>
-                    <a href="assets/pictures/gallery-3.jpg" class="gallery-item"><img src="assets/pictures/surveyaward.jpg" alt="Community event"></a>
-                    <a href="assets/pictures/gallery-4.jpg" class="gallery-item"><img src="assets/pictures/makingboxes.jpeg" alt="Team photo"></a>
+                    <!-- TO ADD A NEW IMAGE: Just copy the line below. Change the image path in both places and update the alt text and caption. -->
+                    <a href="assets/pictures/packingboxes.jpg" class="gallery-item" data-caption="Baking for a cause.">
+                        <img src="assets/pictures/packingboxes.jpg" alt="Selling baked goods.">
+                        <figcaption>Selling baked goods at an event.</figcaption>
+                    </a>
+                    <a href="assets/pictures/saturdaywork.jpeg" class="gallery-item" data-caption="Saturday meeting.">
+                        <img src="assets/pictures/saturdaywork.jpeg" alt="Finished baked goods">
+                        <figcaption>Working hard at a regular Saturday work meeting.</figcaption>
+                    </a>
+                    <a href="assets/pictures/surveyaward.jpg" class="gallery-item" data-caption="Survey award.">
+                        <img src="assets/pictures/surveyaward.jpg" alt="Community event">
+                        <figcaption>Won an award for a survey competition hosted by Next Generation Advocates.</figcaption>
+                    </a>
+                    <a href="assets/pictures/makingboxes.jpeg" class="gallery-item" data-caption="Making boxes.">
+                        <img src="assets/pictures/makingboxes.jpeg" alt="Team photo">
+                        <figcaption>Making boxes to pack our product.</figcaption>
+                    </a>
                 </div>
             </div>
         </section>
+        
+        <div class="lightbox-modal" id="lightbox">
+            <div class="lightbox-content">
+                <button class="lightbox-close" id="lightbox-close">&times;</button>
+                <img src="" alt="Enlarged gallery image" class="lightbox-image" id="lightbox-image">
+                <div class="lightbox-caption" id="lightbox-caption"></div>
+                <button class="lightbox-prev" id="lightbox-prev">&larr;</button>
+                <button class="lightbox-next" id="lightbox-next">&rarr;</button>
+            </div>
+        </div>
 
         <section class="page-section alt-bg">
             <div class="container">
