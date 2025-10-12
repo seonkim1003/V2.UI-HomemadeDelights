@@ -37,6 +37,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+
+    if (galleryItems.length > 0 && lightbox) {
+        let currentIndex = 0;
+        const images = Array.from(galleryItems).map(item => item.href);
+
+        function showLightbox(index) {
+            lightboxImage.src = images[index];
+            currentIndex = index;
+            lightbox.classList.add('active');
+            document.body.classList.add('body-no-scroll');
+        }
+
+        function hideLightbox() {
+            lightbox.classList.remove('active');
+            document.body.classList.remove('body-no-scroll');
+        }
+
+        function showNextImage() {
+            const newIndex = (currentIndex + 1) % images.length;
+            showLightbox(newIndex);
+        }
+
+        function showPrevImage() {
+            const newIndex = (currentIndex - 1 + images.length) % images.length;
+            showLightbox(newIndex);
+        }
+
+        galleryItems.forEach((item, index) => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                showLightbox(index);
+            });
+        });
+
+        lightboxClose.addEventListener('click', hideLightbox);
+        lightboxNext.addEventListener('click', showNextImage);
+        lightboxPrev.addEventListener('click', showPrevImage);
+        
+        // Close lightbox by clicking on the background
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                hideLightbox();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    hideLightbox();
+                } else if (e.key === 'ArrowRight') {
+                    showNextImage();
+                } else if (e.key === 'ArrowLeft') {
+                    showPrevImage();
+                }
+            }
+        });
+    }
+
 
     // --- Fade-in on Scroll Animation ---
     const faders = document.querySelectorAll('.fade-in');
@@ -62,41 +127,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 });
-
-// --- Gallery Carousel ---
-const track = document.querySelector('.carousel-track');
-const slides = Array.from(track.children);
-const nextButton = document.querySelector('.carousel-button.next');
-const prevButton = document.querySelector('.carousel-button.prev');
-
-if (track) {
-    const slideWidth = slides[0].getBoundingClientRect().width;
-
-    // Arrange the slides next to one another
-    const setSlidePosition = (slide, index) => {
-        slide.style.left = slideWidth * index + 'px';
-    };
-    slides.forEach(setSlidePosition);
-
-    const moveToSlide = (track, currentSlide, targetSlide) => {
-        track.style.transform = 'translateX(-' + targetSlide.style.left + ')';
-        currentSlide.classList.remove('current-slide');
-        targetSlide.classList.add('current-slide');
-    }
-
-    // When I click left, move slides to the left
-    prevButton.addEventListener('click', e => {
-        const currentSlide = track.querySelector('.current-slide') || slides[0];
-        const prevSlide = currentSlide.previousElementSibling || slides[slides.length - 1];
-
-        moveToSlide(track, currentSlide, prevSlide);
-    });
-
-    // When I click right, move slides to the right
-    nextButton.addEventListener('click', e => {
-        const currentSlide = track.querySelector('.current-slide') || slides[0];
-        const nextSlide = currentSlide.nextElementSibling || slides[0];
-
-        moveToSlide(track, currentSlide, nextSlide);
-    });
-}
