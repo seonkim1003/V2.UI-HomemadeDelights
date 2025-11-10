@@ -6,20 +6,27 @@
         <title>About Us - Homemade Delights</title>
         <link rel="stylesheet" href="style.css">
         <link rel="icon" href="assets/logo.png" type="image/png">
+        <script src="translations.js"></script>
     </head>
 <body>
     <!-- Navigation Bar -->
     <nav>
         <a href="index.html" class="nav-logo">
             <img src="assets/logo.png" alt="Homemade Delights Logo">
-            <span>Homemade Delights</span>
+            <span data-translate="Homemade Delights">Homemade Delights</span>
         </a>
         <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="about.html" class="active">About Us</a></li>
-            <li><a href="menu.html">Menu & Donate</a></li>
-            <li><a href="contact.html">Contact</a></li>
-            <li><a href="join.html">Join Us</a></li>
+            <li><a href="index.html" data-translate="Home">Home</a></li>
+            <li><a href="about.html" class="active" data-translate="About Us">About Us</a></li>
+            <li><a href="menu.html" data-translate="Menu & Donate">Menu & Donate</a></li>
+            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
+            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
+            <li class="language-switcher">
+                <select id="language-select">
+                    <option value="en">English</option>
+                    <option value="ko">Korean</option>
+                </select>
+            </li>
         </ul>
         <button class="nav-toggle" aria-label="toggle navigation">
             <span class="hamburger"></span>
@@ -31,8 +38,8 @@
         <!-- About Hero Section -->
         <section class="about-hero">
             <div class="container">
-                <h2>OUR MISSION</h2>
-                <p>To make Mental Health support as accessible as possible and spread awareness around the globe.</p>
+                <h2 data-translate="OUR MISSION">OUR MISSION</h2>
+                <p data-translate="To make Mental Health support as accessible as possible and spread awareness around the globe.">To make Mental Health support as accessible as possible and spread awareness around the globe.</p>
             </div>
         </section>
     
@@ -43,10 +50,10 @@
                     <img src="assets/team/tevyn.jpeg" alt="Tevyn Yong">
                 </div>
                 <div class="founder-bio">
-                    <h2>Our Story & Founder</h2>
-                    <h3>Tevyn Yong</h3>
-                    <h4>Founder, Product Management</h4>
-                    <p>Homemade Delights was started because when I was in middle school, I had many personal friends who struggled with mental health problems. While they were suffering, they were not able to get the help that they needed. So, Homemade Delights was created to reach out and offer support to people who are in need of it. We want to build a community where asking for help is as easy as sharing a cookie.</p>
+                    <h2 data-translate="Our Story & Founder">Our Story & Founder</h2>
+                    <h3 data-translate="Tevyn Yong">Tevyn Yong</h3>
+                    <h4 data-translate="Founder, Product Management">Founder, Product Management</h4>
+                    <p data-translate="Homemade Delights was started because when I was in middle school, I had many personal friends who struggled with mental health problems. While they were suffering, they were not able to get the help that they needed. So, Homemade Delights was created to reach out and offer support to people who are in need of it. We want to build a community where asking for help is as easy as sharing a cookie.">Homemade Delights was started because when I was in middle school, I had many personal friends who struggled with mental health problems. While they were suffering, they were not able to get the help that they needed. So, Homemade Delights was created to reach out and offer support to people who are in need of it. We want to build a community where asking for help is as easy as sharing a cookie.</p>
                 </div>
             </div>
         </section>
@@ -54,21 +61,21 @@
         <!-- Team Section -->
         <section class="page-section alt-bg">
             <div class="container">
-                <h2>Meet The Team</h2>
+                <h2 data-translate="Meet The Team">Meet The Team</h2>
                 <div class="team-grid">
                     <!-- Brandon Baek -->
                     <div class="team-member" role="button" tabindex="0" aria-label="Read more about Brandon Baek">
                         <div class="team-member-inner">
                             <div class="team-member-front">
                                 <img src="assets/team/brandon.jpeg" alt="Brandon Baek">
-                                <h3>Brandon Baek</h3>
-                                <h4>Co-Founder, Marketing & Outreach</h4>
-                                <p class="flip-instruction">Click to read more</p>
+                                <h3 data-translate="Brandon Baek">Brandon Baek</h3>
+                                <h4 data-translate="Co-Founder, Marketing & Outreach">Co-Founder, Marketing & Outreach</h4>
+                                <p class="flip-instruction" data-translate="Click to read more">Click to read more</p>
                             </div>
                             <div class="team-member-back">
-                                <h3>Brandon Baek</h3>
-                                <h4>Co-Founder, Marketing & Outreach</h4>
-                                <p>I joined HD because mental health has always seemed like a vital portion of everyone's lives that many neglect. Seeing friends, family members, and even me go through the world of mental health has really inspired me to help others.</p>
+                                <h3 data-translate="Brandon Baek">Brandon Baek</h3>
+                                <h4 data-translate="Co-Founder, Marketing & Outreach">Co-Founder, Marketing & Outreach</h4>
+                                <p data-translate="I joined HD because mental health has always seemed like a vital portion of everyone's lives that many neglect. Seeing friends, family members, and even me go through the world of mental health has really inspired me to help others.">I joined HD because mental health has always seemed like a vital portion of everyone's lives that many neglect. Seeing friends, family members, and even me go through the world of mental health has really inspired me to help others.</p>
                             </div>
                         </div>
                     </div>
@@ -77,14 +84,14 @@
                         <div class="team-member-inner">
                             <div class="team-member-front">
                                 <img src="assets/team/seonho.jpeg" alt="Seonho Kim">
-                                <h3>Seonho Kim</h3>
-                                <h4>Co-Founder, Finance & Sales</h4>
-                                <p class="flip-instruction">Click to read more</p>
+                                <h3 data-translate="Seonho Kim">Seonho Kim</h3>
+                                <h4 data-translate="Co-Founder, Finance & Sales">Co-Founder, Finance & Sales</h4>
+                                <p class="flip-instruction" data-translate="Click to read more">Click to read more</p>
                             </div>
                             <div class="team-member-back">
-                                <h3>Seonho Kim</h3>
-                                <h4>Co-Founder, Finance & Sales</h4>
-                                <p>By joining HD, I wanted to learn more about causes, effects, and ways to build better mental health as I go about my life, while also moving for awareness and change in this field.</p>
+                                <h3 data-translate="Seonho Kim">Seonho Kim</h3>
+                                <h4 data-translate="Co-Founder, Finance & Sales">Co-Founder, Finance & Sales</h4>
+                                <p data-translate="By joining HD, I wanted to learn more about causes, effects, and ways to build better mental health as I go about my life, while also moving for awareness and change in this field.">By joining HD, I wanted to learn more about causes, effects, and ways to build better mental health as I go about my life, while also moving for awareness and change in this field.</p>
                             </div>
                         </div>
                     </div>
@@ -111,8 +118,8 @@
         <!-- Carousel Section -->
         <section class="page-section fade-in">
             <div class="container">
-                <h2>Our Journey in Photos</h2>
-                <p class="section-intro">👆 Click any photo to see it larger.</p>
+                <h2 data-translate="Our Journey in Photos">Our Journey in Photos</h2>
+                <p class="section-intro" data-translate="👆 Click any photo to see it larger.">👆 Click any photo to see it larger.</p>
                 
                 <div class="carousel-container">
                     <div class="carousel-viewport">
@@ -120,22 +127,22 @@
                             <!-- Slide 1 -->
                             <div class="carousel-slide">
                                 <img src="assets/pictures/packingboxes.jpg" alt="Selling baked goods" data-large-src="assets/pictures/packingboxes.jpg" data-caption="Baking for a cause.">
-                                <figcaption>Selling baked goods</figcaption>
+                                <figcaption data-translate="Selling baked goods">Selling baked goods</figcaption>
                             </div>
                             <!-- Slide 2 -->
                             <div class="carousel-slide">
                                 <img src="assets/pictures/saturdaywork.jpeg" alt="Regular meeting" data-large-src="assets/pictures/saturdaywork.jpeg" data-caption="Working hard at a regular Saturday work meeting.">
-                                <figcaption>Regular meeting</figcaption>
+                                <figcaption data-translate="Regular meeting">Regular meeting</figcaption>
                             </div>
                             <!-- Slide 3 -->
                             <div class="carousel-slide">
                                 <img src="assets/pictures/surveyaward.jpg" alt="Survey award" data-large-src="assets/pictures/surveyaward.jpg" data-caption="Won an award for a survey competition hosted by Next Generation Advocates.">
-                                <figcaption>Survey competition award</figcaption>
+                                <figcaption data-translate="Survey competition award">Survey competition award</figcaption>
                             </div>
                             <!-- Slide 4 -->
                             <div class="carousel-slide">
                                 <img src="assets/pictures/makingboxes.jpeg" alt="Making boxes" data-large-src="assets/pictures/makingboxes.jpeg" data-caption="Making boxes to pack our product.">
-                                <figcaption>Making boxes</figcaption>
+                                <figcaption data-translate="Making boxes">Making boxes</figcaption>
                             </div>
                         </div>
                     </div>
@@ -159,23 +166,23 @@
         <section class="page-section alt-bg">
             <div class="container">
                 <div class="impact-section">
-                    <h2>How We Make an Impact</h2>
-                    <p class="section-intro">Our mission is multifaceted. We focus on direct action, education, and financial support to make the greatest possible impact on mental health awareness.</p>
+                    <h2 data-translate="How We Make an Impact">How We Make an Impact</h2>
+                    <p class="section-intro" data-translate="Our mission is multifaceted. We focus on direct action, education, and financial support to make the greatest possible impact on mental health awareness.">Our mission is multifaceted. We focus on direct action, education, and financial support to make the greatest possible impact on mental health awareness.</p>
                     
-                    <h4>Our Methods</h4>
+                    <h4 data-translate="Our Methods">Our Methods</h4>
                     <ul>
-                        <li>Spreading Awareness on Mental Health</li>
-                        <li>Posting Educational Social Media Content</li>
+                        <li data-translate="Spreading Awareness on Mental Health">Spreading Awareness on Mental Health</li>
+                        <li data-translate="Posting Educational Social Media Content">Posting Educational Social Media Content</li>
                     </ul>
     
-                    <h4>Organizations We Support</h4>
+                    <h4 data-translate="Organizations We Support">Organizations We Support</h4>
                      <ul>
-                        <li>Rise Above the Disorder</li>
-                        <li>988 Hotline</li>
-                        <li>Mental Health of America</li>
-                        <li>Our Third Place</li>
-                        <li>Sunrise Counseling Community Center</li>
-                        <li>Miracle Mile</li>
+                        <li data-translate="Rise Above the Disorder">Rise Above the Disorder</li>
+                        <li data-translate="988 Hotline">988 Hotline</li>
+                        <li data-translate="Mental Health of America">Mental Health of America</li>
+                        <li data-translate="Our Third Place">Our Third Place</li>
+                        <li data-translate="Sunrise Counseling Community Center">Sunrise Counseling Community Center</li>
+                        <li data-translate="Miracle Mile">Miracle Mile</li>
                     </ul>
                 </div>
             </div>
@@ -184,7 +191,7 @@
     
     <!-- Footer -->
     <footer>
-        <p>© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates</p>
     </footer>
     
     <script src="script.js"></script>
