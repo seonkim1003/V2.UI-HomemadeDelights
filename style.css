@@ -197,6 +197,15 @@ nav {
     width: 60%;
 }
 
+.nav-extras {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 1001;
+    /* Ensure above mobile menu */
+}
+
 .nav-toggle {
     display: none;
 }
@@ -1186,21 +1195,15 @@ footer p {
     /* Mobile Language Switcher */
     .language-switcher {
         margin-left: 0;
-        margin-top: 10px;
+        /* margin-top removed */
     }
 
+    /* .lang-btn, .lang-menu adjustments no longer needed for centering, reusing desktop right-align */
     .lang-btn {
-        font-size: 1.5rem;
-        padding: 10px 25px;
-    }
-
-    .lang-menu {
-        right: 50%;
-        transform: translateX(50%) translateY(10px);
-    }
-
-    .lang-dropdown.active .lang-menu {
-        transform: translateX(50%) translateY(0);
+        padding: 5px 12px;
+        /* Smaller padding on mobile if needed, or keep standard */
+        font-size: 0.9rem;
+        /* Keep it manageable */
     }
 }
 

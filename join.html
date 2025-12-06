@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="icon" href="assets/logo.png" type="image/png">
     <script src="translations.js"></script>
 </head>
+
 <body>
     <!-- Navigation Bar -->
     <nav>
@@ -21,16 +23,33 @@
             <li><a href="menu.html" data-translate="Menu & Donate">Menu & Donate</a></li>
             <li><a href="contact.html" data-translate="Contact">Contact</a></li>
             <li><a href="join.html" class="active" data-translate="Join Us">Join Us</a></li>
-            <li class="language-switcher">
-                <select id="language-select">
+        </ul>
+        <div class="nav-extras">
+            <div class="language-switcher">
+                <div class="lang-dropdown">
+                    <button class="lang-btn" aria-label="Select Language">
+                        <span class="current-lang">🇺🇸 EN</span>
+                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <ul class="lang-menu">
+                        <li data-value="en" class="selected">🇺🇸 English</li>
+                        <li data-value="ko">🇰🇷 한국어</li>
+                    </ul>
+                </div>
+                <!-- Hidden select for JS compatibility -->
+                <select id="language-select" style="display: none;">
                     <option value="en">English</option>
                     <option value="ko">Korean</option>
                 </select>
-            </li>
-        </ul>
-        <button class="nav-toggle" aria-label="toggle navigation">
-            <span class="hamburger"></span>
-        </button>
+            </div>
+            <button class="nav-toggle" aria-label="toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+        </div>
     </nav>
 
     <!-- Main Content -->
@@ -38,11 +57,16 @@
         <section class="page-section">
             <div class="container">
                 <h2 data-translate="Join Our Team">Join Our Team</h2>
-                <p class="section-intro" data-translate="We are always looking for passionate individuals to join our mission of spreading mental health awareness. If you are interested in becoming a part of our team, please fill out the form below.">We are always looking for passionate individuals to join our mission of spreading mental health awareness. If you are interested in becoming a part of our team, please fill out the form below.</p>
+                <p class="section-intro"
+                    data-translate="We are always looking for passionate individuals to join our mission of spreading mental health awareness. If you are interested in becoming a part of our team, please fill out the form below.">
+                    We are always looking for passionate individuals to join our mission of spreading mental health
+                    awareness. If you are interested in becoming a part of our team, please fill out the form below.</p>
 
                 <!-- Google Form Embed Container -->
                 <div class="form-container">
-                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe3Wa1NadZOI3li_LRtVAgN_oS-_sE_Tw_N2iTCKKJyufvFgg/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                    <iframe
+                        src="https://docs.google.com/forms/d/e/1FAIpQLSe3Wa1NadZOI3li_LRtVAgN_oS-_sE_Tw_N2iTCKKJyufvFgg/viewform?embedded=true"
+                        frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
                 </div>
 
             </div>
@@ -51,9 +75,11 @@
 
     <!-- Footer -->
     <footer>
-        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
+            Homemade Delights - A Student-led Project of Next Generation Advocates</p>
     </footer>
 
     <script src="script.js"></script>
 </body>
+
 </html>
