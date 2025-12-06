@@ -1,11 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
-    
+document.addEventListener('DOMContentLoaded', function () {
+
     // --- Banner Functionality (Restored) ---
     const banner = document.getElementById('promo-banner');
     const closeBannerBtn = document.getElementById('close-banner');
-    
+
     if (banner && closeBannerBtn) {
-        closeBannerBtn.addEventListener('click', function() {
+        closeBannerBtn.addEventListener('click', function () {
             banner.style.display = 'none';
         });
     }
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         rootMargin: "0px 0px -50px 0px"
     };
 
-    const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+    const appearOnScroll = new IntersectionObserver(function (entries, appearOnScroll) {
         entries.forEach(entry => {
             if (!entry.isIntersecting) {
                 return;
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             prevButton.disabled = currentIndex === 0;
             nextButton.disabled = currentIndex >= slides.length - slidesPerPage;
         };
-        
+
         nextButton.addEventListener('click', () => {
             if (currentIndex < slides.length - slidesPerPage) {
                 currentIndex++;
@@ -109,11 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateCarousel();
             }
         });
-        
+
         window.addEventListener('resize', () => {
             updateSlidesPerPage();
             if (currentIndex > slides.length - slidesPerPage) {
-                 currentIndex = Math.max(0, slides.length - slidesPerPage);
+                currentIndex = Math.max(0, slides.length - slidesPerPage);
             }
             updateCarousel();
         });
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 caption: img.dataset.caption
             };
         });
-        
+
         let lightboxIndex = 0;
 
         function showLightbox(index) {
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
             lightbox.classList.remove('active');
             document.body.classList.remove('body-no-scroll');
         }
-        
+
         function showNextImage() {
             lightboxIndex = (lightboxIndex + 1) % galleryData.length;
             showLightbox(lightboxIndex);
@@ -162,11 +162,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 showLightbox(index);
             });
         });
-        
+
         if (lightboxClose) lightboxClose.addEventListener('click', hideLightbox);
         if (lightboxNextBtn) lightboxNextBtn.addEventListener('click', showNextImage);
         if (lightboxPrevBtn) lightboxPrevBtn.addEventListener('click', showPrevImage);
-        
+
         lightbox.addEventListener('click', (e) => {
             if (e.target === lightbox) {
                 hideLightbox();
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Team Card Flip Functionality ---
     const teamMembers = document.querySelectorAll('.team-grid .team-member');
-    
+
     const handleFlip = (member) => {
         member.classList.toggle('is-flipped');
     };
@@ -203,6 +203,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const languageSelect = document.getElementById('language-select');
     const translatableElements = document.querySelectorAll('[data-translate]');
 
+    // Custom Dropdown Elements
+    const langDropdown = document.querySelector('.lang-dropdown');
+    const langBtn = document.querySelector('.lang-btn');
+    const currentLangSpan = document.querySelector('.current-lang');
+    const langOptions = document.querySelectorAll('.lang-menu li');
+
     const updateTranslations = (language) => {
         translatableElements.forEach(element => {
             const key = element.dataset.translate;
@@ -216,6 +222,26 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.lang = language;
         localStorage.setItem('language', language);
         updateTranslations(language);
+
+        // Update Custom UI
+        if (currentLangSpan) {
+            currentLangSpan.textContent = language === 'ko' ? '🇰🇷 KO' : '🇺🇸 EN';
+        }
+
+        if (langOptions) {
+            langOptions.forEach(opt => {
+                if (opt.dataset.value === language) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+        }
+
+        // Sync hidden select
+        if (languageSelect) {
+            languageSelect.value = language;
+        }
     };
 
     const getInitialLanguage = () => {
@@ -224,11 +250,36 @@ document.addEventListener('DOMContentLoaded', function() {
         return savedLanguage || (translations[browserLanguage] ? browserLanguage : 'en');
     };
 
-    if (languageSelect) {
-        const initialLanguage = getInitialLanguage();
-        languageSelect.value = initialLanguage;
-        setLanguage(initialLanguage);
+    // Initialize
+    const initialLanguage = getInitialLanguage();
+    setLanguage(initialLanguage);
 
+    // Event Listeners for Custom Dropdown
+    if (langDropdown && langBtn) {
+        langBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('active');
+        });
+
+        langOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const selectedLang = option.dataset.value;
+                setLanguage(selectedLang);
+                langDropdown.classList.remove('active');
+            });
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!langDropdown.contains(e.target)) {
+                langDropdown.classList.remove('active');
+            }
+        });
+    }
+
+    // Keep hidden select listener just in case other things use it, 
+    // though our custom UI calls setLanguage directly.
+    if (languageSelect) {
         languageSelect.addEventListener('change', (e) => {
             setLanguage(e.target.value);
         });

@@ -31,7 +31,20 @@
             <li><a href="contact.html" data-translate="Contact">Contact</a></li>
             <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
             <li class="language-switcher">
-                <select id="language-select">
+                <div class="lang-dropdown">
+                    <button class="lang-btn" aria-label="Select Language">
+                        <span class="current-lang">🇺🇸 EN</span>
+                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <ul class="lang-menu">
+                        <li data-value="en" class="selected">🇺🇸 English</li>
+                        <li data-value="ko">🇰🇷 한국어</li>
+                    </ul>
+                </div>
+                <!-- Hidden select for JS compatibility -->
+                <select id="language-select" style="display: none;">
                     <option value="en">English</option>
                     <option value="ko">Korean</option>
                 </select>
