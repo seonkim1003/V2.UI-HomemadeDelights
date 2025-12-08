@@ -103,14 +103,32 @@ HomeMadeDelights/
 
 ## Development
 
-For local development with the old Node.js server (if needed):
+### Cloudflare Pages Development (Recommended)
 
 ```bash
-# Install old dependencies (if you have server.js)
-npm install express multer cors
+# Install dependencies
+npm install
 
-# Run local server
-node server.js
+# Run local development server with Cloudflare Pages Functions
+npm run dev
 ```
 
-Note: `server.js` is kept for reference but is not used in Cloudflare Pages deployment.
+This uses Wrangler to simulate Cloudflare Pages locally.
+
+### Local Node.js Server (Optional - for testing)
+
+If you want to test with the old Node.js server locally:
+
+```bash
+# Dependencies are already in package.json
+npm install
+
+# Run local server (uses local file storage, not R2/KV)
+npm run dev:local
+# Or: node server.js
+```
+
+**Note**: 
+- `server.js` uses local file storage (`uploads/` directory)
+- Cloudflare Pages uses R2 and KV (configured in dashboard)
+- For production, use Cloudflare Pages deployment (not server.js)
