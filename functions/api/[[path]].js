@@ -97,8 +97,16 @@ export async function onRequest(context) {
 
   if (path.startsWith('/api/image/') && request.method === 'GET') {
     let filename = path.split('/api/image/')[1];
+    // Handle query parameters if any
+    if (filename.includes('?')) {
+      filename = filename.split('?')[0];
+    }
     // URL decode the filename in case it contains encoded characters
-    filename = decodeURIComponent(filename);
+    try {
+      filename = decodeURIComponent(filename);
+    } catch (e) {
+      console.warn('Failed to decode filename, using as-is:', filename, e);
+    }
     return handleGetImage(filename, GALLERY_R2, corsHeaders);
   }
 
@@ -115,6 +123,11 @@ export async function onRequest(context) {
   // Debug endpoint to check bindings
   if (path === '/api/debug/bindings' && request.method === 'GET') {
     return handleDebugBindings(GALLERY_R2, GALLERY_KV, env, corsHeaders);
+  }
+
+  // Test image endpoint - list first image and try to serve it
+  if (path === '/api/test-image' && request.method === 'GET') {
+    return handleTestImage(GALLERY_R2, corsHeaders);
   }
 
   return new Response('Not Found', { status: 404, headers: corsHeaders });
@@ -468,37 +481,35 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
 
     const headers = new Headers(corsHeaders);
     
-    // Set content type explicitly
+    // Write HTTP metadata first (this sets Content-Type from R2 metadata if available)
+    if (object.httpMetadata) {
+      object.writeHttpMetadata(headers);
+    }
+    
+    // Always set Content-Type explicitly (R2 metadata might not have it)
     headers.set('Content-Type', contentType);
     
     // Add cache headers for images
     headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    
-    // Write HTTP metadata if available
-    if (object.httpMetadata) {
-      object.writeHttpMetadata(headers);
-    }
     
     // Set ETag if available
     if (object.httpEtag) {
       headers.set('etag', object.httpEtag);
     }
 
-    console.log('Serving image:', filename, 'Content-Type:', contentType);
-    
-    // Handle the object body - it should be a ReadableStream
-    // If body is null, try to get it as an array buffer
-    let body = object.body;
-    if (!body) {
-      console.warn('Object body is null, trying to read as array buffer');
-      // This shouldn't happen, but handle it gracefully
+    console.log('Serving image:', filename, 'Content-Type:', headers.get('Content-Type'), 'Body type:', typeof object.body, 'Body null?', object.body === null);
+
+    // Handle the object body - R2 objects return a ReadableStream
+    if (!object.body) {
+      console.error('Object body is null for:', filename);
       return new Response('Image data not available', {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
       });
     }
     
-    return new Response(body, {
+    // Return the response with the stream
+    return new Response(object.body, {
       headers,
     });
   } catch (error) {
@@ -659,4 +670,56 @@ async function handleDebugBindings(r2Binding, kvBinding, env, corsHeaders) {
   }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
+}
+
+// GET /api/test-image - Test endpoint to list and serve first image
+async function handleTestImage(r2Binding, corsHeaders) {
+  try {
+    if (!r2Binding) {
+      return new Response(JSON.stringify({ error: 'R2 binding not available' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // List objects in R2
+    const listResult = await r2Binding.list({ limit: 1 });
+    
+    if (!listResult || !listResult.objects || listResult.objects.length === 0) {
+      return new Response(JSON.stringify({ 
+        message: 'No images found in R2',
+        objects: []
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const firstObject = listResult.objects[0];
+    
+    return new Response(JSON.stringify({
+      message: 'Found images in R2',
+      totalObjects: listResult.objects.length,
+      firstImage: {
+        key: firstObject.key,
+        size: firstObject.size,
+        uploaded: firstObject.uploaded,
+        url: `/api/image/${encodeURIComponent(firstObject.key)}`
+      },
+      allObjects: listResult.objects.map(obj => ({
+        key: obj.key,
+        size: obj.size,
+        url: `/api/image/${encodeURIComponent(obj.key)}`
+      }))
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ 
+      error: 'Failed to test R2: ' + error.message,
+      stack: error.stack
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 }
