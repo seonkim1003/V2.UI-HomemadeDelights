@@ -371,13 +371,15 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       const file = files[i];
       const uniqueSuffix = Date.now() + '-' + i + '-' + Math.round(Math.random() * 1E9);
       const ext = file.name.split('.').pop() || 'jpg';
-      const filename = `image-${uniqueSuffix}.${ext}`;
+      const imageName = `image-${uniqueSuffix}.${ext}`;
+      // Store in R2 with gallery-image/ directory prefix
+      const r2Key = `gallery-image/${imageName}`;
 
       // Upload to R2
       try {
         // Ensure we have a valid content type
         const contentType = file.type || 'image/jpeg';
-        console.log('Uploading to R2:', filename, 'Content-Type:', contentType, 'Size:', file.size, 'Type:', typeof file);
+        console.log('📤 Uploading to R2:', r2Key, 'Content-Type:', contentType, 'Size:', file.size, 'Type:', typeof file);
         
         // Convert file to ArrayBuffer for R2 upload
         // In Cloudflare Workers, FormData files are File objects (which extend Blob)
@@ -407,7 +409,7 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
         }
         
         // Upload to R2 - R2 accepts ArrayBuffer, ReadableStream, or Blob
-        console.log('📤 Calling R2 put for:', filename, 'Body type:', fileBody instanceof ArrayBuffer ? 'ArrayBuffer' : typeof fileBody, 'Size:', fileBody instanceof ArrayBuffer ? fileBody.byteLength : 'unknown');
+        console.log('📤 Calling R2 put for:', r2Key, 'Body type:', fileBody instanceof ArrayBuffer ? 'ArrayBuffer' : typeof fileBody, 'Size:', fileBody instanceof ArrayBuffer ? fileBody.byteLength : 'unknown');
         
         // Ensure we're uploading the correct data type
         let uploadBody = fileBody;
@@ -427,33 +429,33 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
           }
         }
         
-        const putResult = await r2Binding.put(filename, uploadBody, {
+        const putResult = await r2Binding.put(r2Key, uploadBody, {
           httpMetadata: {
             contentType: contentType,
           },
         });
-        console.log('✅ R2 put completed:', filename);
+        console.log('✅ R2 put completed:', r2Key);
         
         // Verify upload by trying to get it back (with a delay to ensure consistency)
         await new Promise(resolve => setTimeout(resolve, 200));
-        const verify = await r2Binding.get(filename);
+        const verify = await r2Binding.get(r2Key);
         if (!verify) {
-          console.error('❌ Upload verification failed - object not found after upload:', filename);
+          console.error('❌ Upload verification failed - object not found after upload:', r2Key);
           throw new Error('Upload verification failed - file not found in R2 after upload');
         }
         if (verify.size === 0) {
-          console.error('❌ Upload verification failed - file size is 0:', filename);
+          console.error('❌ Upload verification failed - file size is 0:', r2Key);
           throw new Error('Upload verification failed - file size is 0');
         }
-        console.log('✅ Upload verified - object exists in R2:', filename, 'Size:', verify.size, 'bytes', 'Content-Type:', verify.httpMetadata?.contentType || contentType);
+        console.log('✅ Upload verified - object exists in R2:', r2Key, 'Size:', verify.size, 'bytes', 'Content-Type:', verify.httpMetadata?.contentType || contentType);
       } catch (r2Error) {
-        console.error('❌ R2 upload error for', filename, ':', r2Error);
+        console.error('❌ R2 upload error for', r2Key, ':', r2Error);
         console.error('Error name:', r2Error.name);
         console.error('Error message:', r2Error.message);
         console.error('Error stack:', r2Error.stack);
         return new Response(JSON.stringify({ 
           error: 'Failed to upload to R2: ' + r2Error.message,
-          filename: filename,
+          filename: r2Key,
           details: r2Error.stack || 'No stack trace available'
         }), {
           status: 500,
@@ -462,11 +464,12 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       }
 
       const imageId = Date.now() + '-' + i + '-' + Math.round(Math.random() * 1E9);
+      // Store the full R2 key (with directory) in filename, and use it in the path
       const imageRecord = {
         id: imageId,
-        filename: filename,
+        filename: r2Key, // Full R2 key including directory: gallery-image/image-123.jpg
         originalName: file.name,
-        path: `/api/image/${filename}`,
+        path: `/api/image/${r2Key}`, // API path includes the directory
         groupId: targetGroup.id,
         uploadedAt: new Date().toISOString()
       };
@@ -552,15 +555,35 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       });
     }
     
-    console.log('🔍 Fetching image from R2:', filename);
+    // The filename from URL may or may not include gallery-image/ prefix
+    // Handle both cases for backward compatibility
+    let r2Key = filename;
+    if (!filename.startsWith('gallery-image/')) {
+      // If old format (no prefix), try with prefix first, then fallback
+      r2Key = `gallery-image/${filename}`;
+      console.log('🔍 Fetching image from R2 (with prefix):', r2Key);
+    } else {
+      console.log('🔍 Fetching image from R2:', r2Key);
+    }
+    
     let object;
     try {
-      object = await r2Binding.get(filename);
+      object = await r2Binding.get(r2Key);
+      // If not found with prefix, try without (for backward compatibility)
+      if (!object && filename.startsWith('gallery-image/')) {
+        const fallbackKey = filename.replace('gallery-image/', '');
+        console.log('⚠️ Not found with prefix, trying without:', fallbackKey);
+        object = await r2Binding.get(fallbackKey);
+        if (object) {
+          r2Key = fallbackKey;
+        }
+      }
     } catch (getError) {
       console.error('❌ Error getting object from R2:', getError);
       return new Response(JSON.stringify({ 
         error: 'Failed to retrieve image from R2: ' + getError.message,
-        filename: filename
+        filename: filename,
+        r2Key: r2Key
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -568,7 +591,7 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
     }
     
     if (!object) {
-      console.warn('⚠️ Image not found in R2:', filename);
+      console.warn('⚠️ Image not found in R2:', r2Key, '(tried:', filename, ')');
       return new Response('Image not found', {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
@@ -616,11 +639,11 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       headers.set('Content-Length', object.size.toString());
     }
 
-    console.log('✅ Serving image:', filename, 'Content-Type:', headers.get('Content-Type'), 'Size:', object.size, 'bytes', 'Body type:', typeof object.body, 'Body null?', object.body === null);
+    console.log('✅ Serving image:', r2Key, 'Content-Type:', headers.get('Content-Type'), 'Size:', object.size, 'bytes', 'Body type:', typeof object.body, 'Body null?', object.body === null);
 
     // Handle the object body - R2 objects return a ReadableStream
     if (!object.body) {
-      console.error('❌ Object body is null for:', filename);
+      console.error('❌ Object body is null for:', r2Key);
       return new Response('Image data not available', {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
@@ -636,14 +659,14 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       // Check if it has stream-like properties
       if (bodyStream && typeof bodyStream.getReader === 'function') {
         // It's stream-like, use it directly
-        console.log('Using stream-like object for:', filename);
+        console.log('Using stream-like object for:', r2Key);
       } else if (bodyStream && typeof bodyStream.arrayBuffer === 'function') {
         // It's a Blob-like object, convert to stream
-        console.log('Converting Blob-like object to stream for:', filename);
+        console.log('Converting Blob-like object to stream for:', r2Key);
         bodyStream = bodyStream.stream();
       } else if (bodyStream && typeof bodyStream.stream === 'function') {
         // It has a stream method, use it
-        console.log('Using stream() method for:', filename);
+        console.log('Using stream() method for:', r2Key);
         bodyStream = bodyStream.stream();
       } else {
         console.error('❌ Object body is not a valid stream:', typeof bodyStream, 'Has getReader:', typeof bodyStream?.getReader, 'Has stream:', typeof bodyStream?.stream);
@@ -663,7 +686,8 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       console.error('❌ Error creating Response:', responseError);
       return new Response(JSON.stringify({ 
         error: 'Failed to create image response: ' + responseError.message,
-        filename: filename
+        filename: filename,
+        r2Key: r2Key
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -908,12 +932,31 @@ async function handleTestImage(r2Binding, corsHeaders) {
       });
     }
 
-    // List objects in R2
-    const listResult = await r2Binding.list({ limit: 1 });
+    // List objects in R2 - list from gallery-image/ directory
+    const listResult = await r2Binding.list({ 
+      prefix: 'gallery-image/',
+      limit: 10 
+    });
     
     if (!listResult || !listResult.objects || listResult.objects.length === 0) {
+      // Also check root level for backward compatibility
+      const rootList = await r2Binding.list({ limit: 10 });
+      if (rootList && rootList.objects && rootList.objects.length > 0) {
+        return new Response(JSON.stringify({
+          message: 'Found images in R2 (root level - old format)',
+          totalObjects: rootList.objects.length,
+          allObjects: rootList.objects.map(obj => ({
+            key: obj.key,
+            size: obj.size,
+            url: `/api/image/${encodeURIComponent(obj.key)}`
+          }))
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       return new Response(JSON.stringify({ 
-        message: 'No images found in R2',
+        message: 'No images found in R2 (checked gallery-image/ directory and root)',
         objects: []
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -923,7 +966,7 @@ async function handleTestImage(r2Binding, corsHeaders) {
     const firstObject = listResult.objects[0];
     
     return new Response(JSON.stringify({
-      message: 'Found images in R2',
+      message: 'Found images in R2 (gallery-image/ directory)',
       totalObjects: listResult.objects.length,
       firstImage: {
         key: firstObject.key,
