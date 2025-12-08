@@ -302,6 +302,9 @@ async function uploadImages() {
                     }, 1000);
                 } catch (parseError) {
                     console.error('Error parsing response:', parseError);
+                    uploadProgress.style.display = 'none';
+                    uploadBtn.disabled = false;
+                    progressFill.style.width = '0%';
                     throw new Error('Invalid server response');
                 }
             } else {
@@ -309,9 +312,19 @@ async function uploadImages() {
                 try {
                     const errorResponse = JSON.parse(xhr.responseText);
                     errorMessage = errorResponse.error || errorMessage;
+                    
+                    // Check for binding configuration errors
+                    if (errorMessage.includes('binding not configured') || 
+                        errorMessage.includes('R2') || 
+                        errorMessage.includes('KV')) {
+                        errorMessage += '\n\nPlease configure R2 and KV bindings in Cloudflare Pages:\nSettings → Functions → Bindings';
+                    }
                 } catch (e) {
                     // Use default error message
                 }
+                uploadProgress.style.display = 'none';
+                uploadBtn.disabled = false;
+                progressFill.style.width = '0%';
                 throw new Error(errorMessage);
             }
         });

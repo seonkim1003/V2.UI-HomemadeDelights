@@ -66,11 +66,14 @@ async function getKVData(env, key, defaultValue = []) {
 
 async function setKVData(env, key, data) {
   try {
+    if (!env.GALLERY_KV) {
+      throw new Error('KV binding GALLERY_KV not configured');
+    }
     await env.GALLERY_KV.put(key, JSON.stringify(data));
     return true;
   } catch (error) {
     console.error(`Error writing ${key}:`, error);
-    return false;
+    throw error;
   }
 }
 
@@ -240,6 +243,26 @@ async function handleUpload(request, env, corsHeaders) {
     const images = await getKVData(env, 'images', []);
     const newImages = [];
 
+    // Check if R2 binding exists
+    if (!env.GALLERY_R2) {
+      return new Response(JSON.stringify({ 
+        error: 'R2 bucket binding not configured. Please configure GALLERY_R2 binding in Cloudflare Pages Settings → Functions.' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check if KV binding exists
+    if (!env.GALLERY_KV) {
+      return new Response(JSON.stringify({ 
+        error: 'KV namespace binding not configured. Please configure GALLERY_KV binding in Cloudflare Pages Settings → Functions.' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const uniqueSuffix = Date.now() + '-' + i + '-' + Math.round(Math.random() * 1E9);
@@ -247,11 +270,20 @@ async function handleUpload(request, env, corsHeaders) {
       const filename = `image-${uniqueSuffix}.${ext}`;
 
       // Upload to R2
-      await env.GALLERY_R2.put(filename, file.stream(), {
-        httpMetadata: {
-          contentType: file.type,
-        },
-      });
+      try {
+        await env.GALLERY_R2.put(filename, file.stream(), {
+          httpMetadata: {
+            contentType: file.type,
+          },
+        });
+      } catch (r2Error) {
+        return new Response(JSON.stringify({ 
+          error: 'Failed to upload to R2: ' + r2Error.message 
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
       const imageId = Date.now() + '-' + i + '-' + Math.round(Math.random() * 1E9);
       const imageRecord = {
