@@ -7,7 +7,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
 const MAX_FILES = 100; // Maximum number of files per upload (increased from 10)
 
 // Password protection
-const GALLERY_PASSWORD = 'HDlovesSeonhoMoreThanBrandon';
+const GALLERY_PASSWORD = 'Seonho>Brandon';
 const PASSWORD_STORAGE_KEY = 'gallery_password_verified';
 
 // Global state
