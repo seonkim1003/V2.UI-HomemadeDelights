@@ -52,6 +52,8 @@ This project is configured to deploy on Cloudflare Pages with Workers integratio
 
 6. **Deploy to Cloudflare Pages:**
    - Connect your GitHub repository to Cloudflare Pages
+   - **IMPORTANT**: In Build Settings, **LEAVE BUILD COMMAND EMPTY** (or use `echo "No build needed"`)
+   - **DO NOT** use `npx wrangler deploy` as build command
    - Cloudflare will automatically detect the `functions` directory
    - Make sure to set up the R2 and KV bindings in the Cloudflare dashboard:
      - Go to Pages project → Settings → Functions

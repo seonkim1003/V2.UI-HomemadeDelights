@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "wrangler pages dev",
-    "deploy": "wrangler pages deploy",
     "r2:create": "wrangler r2 bucket create gallery-images",
     "kv:create": "wrangler kv:namespace create GALLERY_KV"
   },

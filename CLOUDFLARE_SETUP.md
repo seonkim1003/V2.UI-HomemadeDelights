@@ -32,12 +32,16 @@ This guide will help you set up the Homemade Delights website on Cloudflare Page
 
 ## Step 3: Configure Build Settings
 
+**IMPORTANT**: Cloudflare Pages with Functions does NOT need a build command!
+
 In the build configuration:
 
 - **Framework preset**: None (or Static Site)
-- **Build command**: (leave empty - no build needed)
-- **Build output directory**: `/` (root)
+- **Build command**: ⚠️ **LEAVE EMPTY** or use `echo "No build needed"` (DO NOT use `npx wrangler deploy`)
+- **Build output directory**: `/` (root) or leave empty
 - **Root directory**: `/` (root)
+
+**Critical**: If you see errors about "Missing entry-point", it means a build command is set incorrectly. Remove any build command that includes `wrangler deploy`.
 
 ## Step 4: Configure Functions Bindings
 
