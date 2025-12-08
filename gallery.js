@@ -22,6 +22,8 @@ const uploadBtn = document.getElementById('upload-btn');
 const uploadProgress = document.getElementById('upload-progress');
 const progressFill = document.getElementById('progress-fill');
 const progressText = document.getElementById('progress-text');
+const uploadSuccess = document.getElementById('upload-success');
+const successMessage = document.getElementById('success-message');
 const galleryGrid = document.getElementById('gallery-grid');
 const loadingSpinner = document.getElementById('loading-spinner');
 const emptyGallery = document.getElementById('empty-gallery');
@@ -282,33 +284,66 @@ async function uploadImages() {
             isUploadComplete = true;
             clearTimeout(uploadTimeout);
             
-            if (xhr.status === 200) {
+            // Accept both 200 and 201 as success
+            if (xhr.status === 200 || xhr.status === 201) {
                 try {
                     const response = JSON.parse(xhr.responseText);
+                    console.log('Upload successful:', response);
+                    
                     progressFill.style.width = '100%';
                     progressText.textContent = 'Upload complete!';
                     
+                    // Show success message
+                    uploadSuccess.style.display = 'block';
+                    successMessage.textContent = `✓ Upload successful! ${response.images?.length || 0} image(s) uploaded. Refreshing gallery...`;
+                    
+                    // Clear preview immediately
+                    clearPreview();
+                    
+                    // Refresh gallery immediately
+                    loadGalleryGroups().then(() => {
+                        console.log('Gallery refreshed after upload');
+                        // Hide success message after gallery loads
+                        setTimeout(() => {
+                            uploadSuccess.style.display = 'none';
+                        }, 3000);
+                    }).catch(err => {
+                        console.error('Error refreshing gallery:', err);
+                        successMessage.textContent = '✓ Upload successful, but failed to refresh gallery. Please refresh the page manually.';
+                        setTimeout(() => {
+                            uploadSuccess.style.display = 'none';
+                        }, 5000);
+                    });
+                    
+                    // Hide progress after showing success
                     setTimeout(() => {
                         uploadProgress.style.display = 'none';
-                        clearPreview();
-                        loadGalleryGroups();
                         uploadBtn.disabled = false;
                         progressFill.style.width = '0%';
+                        progressText.textContent = 'Uploading...';
                         // Reset group selection
                         newGroupRadio.checked = true;
                         groupTitleInput.value = '';
                         groupTitleInput.style.display = 'block';
                         existingGroupSelect.style.display = 'none';
-                    }, 1000);
+                    }, 1500);
                 } catch (parseError) {
-                    console.error('Error parsing response:', parseError);
+                    console.error('Error parsing response:', parseError, xhr.responseText);
                     uploadProgress.style.display = 'none';
+                    uploadSuccess.style.display = 'block';
+                    successMessage.textContent = '⚠ Upload may have succeeded, but received invalid response. Refreshing gallery...';
                     uploadBtn.disabled = false;
                     progressFill.style.width = '0%';
-                    throw new Error('Invalid server response');
+                    progressText.textContent = 'Uploading...';
+                    // Try to refresh gallery anyway
+                    loadGalleryGroups().then(() => {
+                        setTimeout(() => {
+                            uploadSuccess.style.display = 'none';
+                        }, 3000);
+                    });
                 }
             } else {
-                let errorMessage = 'Upload failed';
+                let errorMessage = `Upload failed (Status: ${xhr.status})`;
                 try {
                     const errorResponse = JSON.parse(xhr.responseText);
                     errorMessage = errorResponse.error || errorMessage;
@@ -320,12 +355,14 @@ async function uploadImages() {
                         errorMessage += '\n\nPlease configure R2 and KV bindings in Cloudflare Pages:\nSettings → Functions → Bindings';
                     }
                 } catch (e) {
-                    // Use default error message
+                    errorMessage += '\n\nResponse: ' + xhr.responseText.substring(0, 200);
                 }
                 uploadProgress.style.display = 'none';
+                uploadSuccess.style.display = 'none';
                 uploadBtn.disabled = false;
                 progressFill.style.width = '0%';
-                throw new Error(errorMessage);
+                progressText.textContent = 'Uploading...';
+                alert(errorMessage);
             }
         });
 
@@ -358,6 +395,7 @@ async function uploadImages() {
     } catch (error) {
         clearTimeout(uploadTimeout);
         uploadProgress.style.display = 'none';
+        uploadSuccess.style.display = 'none';
         uploadBtn.disabled = false;
         progressFill.style.width = '0%';
         progressText.textContent = 'Uploading...';
@@ -370,17 +408,23 @@ async function uploadImages() {
 async function loadGalleryGroups() {
     loadingSpinner.style.display = 'flex';
     emptyGallery.style.display = 'none';
+    galleryGrid.innerHTML = ''; // Clear existing content
 
     try {
         const response = await fetch(`${API_BASE_URL}/api/groups`);
-        if (!response.ok) throw new Error('Failed to load groups');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to load groups: ${response.status} ${errorText}`);
+        }
         
         const groups = await response.json();
-        allGroups = groups;
-        displayGallery();
+        console.log('Loaded groups:', groups);
+        allGroups = groups || [];
+        await displayGallery();
     } catch (error) {
         console.error('Error loading groups:', error);
-        galleryGrid.innerHTML = '<p>Failed to load groups. Make sure the server is running.</p>';
+        galleryGrid.innerHTML = `<p style="color: red; padding: 20px; text-align: center;">Failed to load groups: ${error.message}<br>Please check the browser console for details.</p>`;
+        emptyGallery.style.display = 'block';
     } finally {
         loadingSpinner.style.display = 'none';
     }
@@ -390,6 +434,7 @@ async function displayGallery() {
     if (allGroups.length === 0) {
         emptyGallery.style.display = 'block';
         galleryGrid.innerHTML = '';
+        console.log('No groups found');
         return;
     }
 
@@ -402,6 +447,9 @@ async function displayGallery() {
         const imagesResponse = await fetch(`${API_BASE_URL}/api/images`);
         if (imagesResponse.ok) {
             allImages = await imagesResponse.json();
+            console.log('Loaded images:', allImages.length);
+        } else {
+            console.warn('Failed to load images:', imagesResponse.status);
         }
     } catch (error) {
         console.error('Error loading images:', error);
@@ -410,6 +458,7 @@ async function displayGallery() {
     // Create group cards
     for (const group of allGroups) {
         const groupImages = allImages.filter(img => img.groupId === group.id);
+        console.log(`Group "${group.title}": ${groupImages.length} images`);
         
         const groupCard = document.createElement('div');
         groupCard.className = 'group-card';
@@ -460,6 +509,8 @@ async function displayGallery() {
 
         galleryGrid.appendChild(groupCard);
     }
+    
+    console.log(`Displayed ${allGroups.length} groups in gallery`);
 }
 
 // ==================== Slideshow Functionality ====================
