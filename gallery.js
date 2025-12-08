@@ -2,6 +2,10 @@
 // Falls back to localhost for local development
 const API_BASE_URL = window.location.origin || 'http://localhost:8788';
 
+// Upload configuration
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
+const MAX_FILES = 10; // Maximum number of files per upload
+
 // Global state
 let selectedFiles = [];
 let allGroups = [];
@@ -147,8 +151,24 @@ function handleFileSelection(files) {
         return;
     }
 
-    selectedFiles = [...selectedFiles, ...imageFiles];
-    updatePreview();
+    // Validate file sizes
+    const oversizedFiles = imageFiles.filter(file => file.size > MAX_FILE_SIZE);
+    if (oversizedFiles.length > 0) {
+        alert(`Some files exceed the ${MAX_FILE_SIZE / (1024 * 1024)}MB limit:\n${oversizedFiles.map(f => f.name).join('\n')}\n\nPlease compress or resize these images.`);
+        imageFiles.splice(imageFiles.indexOf(oversizedFiles[0]), oversizedFiles.length);
+    }
+
+    // Check total file count
+    if (selectedFiles.length + imageFiles.length > MAX_FILES) {
+        const allowed = MAX_FILES - selectedFiles.length;
+        alert(`You can only upload ${MAX_FILES} files at once. Only the first ${allowed} files will be selected.`);
+        imageFiles.splice(allowed);
+    }
+
+    if (imageFiles.length > 0) {
+        selectedFiles = [...selectedFiles, ...imageFiles];
+        updatePreview();
+    }
 }
 
 function updatePreview() {
@@ -227,48 +247,108 @@ async function uploadImages() {
     progressText.textContent = 'Uploading...';
     uploadBtn.disabled = true;
 
+    // Set upload timeout (5 minutes for large files)
+    const UPLOAD_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    let uploadTimeout;
+    let isUploadComplete = false;
+
     try {
         const xhr = new XMLHttpRequest();
 
+        // Set timeout
+        uploadTimeout = setTimeout(() => {
+            if (!isUploadComplete) {
+                xhr.abort();
+                uploadProgress.style.display = 'none';
+                uploadBtn.disabled = false;
+                progressFill.style.width = '0%';
+                alert('Upload timeout. The files may be too large or there was a network issue. Please try again with smaller files.');
+            }
+        }, UPLOAD_TIMEOUT);
+
         // Upload progress
         xhr.upload.addEventListener('progress', (e) => {
-            if (e.lengthComputable) {
-                const percentComplete = (e.loaded / e.total) * 100;
+            if (e.lengthComputable && e.total > 0) {
+                const percentComplete = Math.round((e.loaded / e.total) * 100);
                 progressFill.style.width = percentComplete + '%';
+                progressText.textContent = `Uploading... ${percentComplete}%`;
+            } else {
+                // If size is not computable, show indeterminate progress
+                progressText.textContent = 'Uploading...';
             }
         });
 
         xhr.addEventListener('load', () => {
+            isUploadComplete = true;
+            clearTimeout(uploadTimeout);
+            
             if (xhr.status === 200) {
-                progressFill.style.width = '100%';
-                progressText.textContent = 'Upload complete!';
-                
-                setTimeout(() => {
-                    uploadProgress.style.display = 'none';
-                    clearPreview();
-                    loadGalleryGroups();
-                    uploadBtn.disabled = false;
-                    // Reset group selection
-                    newGroupRadio.checked = true;
-                    groupTitleInput.value = '';
-                    groupTitleInput.style.display = 'block';
-                    existingGroupSelect.style.display = 'none';
-                }, 1000);
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    progressFill.style.width = '100%';
+                    progressText.textContent = 'Upload complete!';
+                    
+                    setTimeout(() => {
+                        uploadProgress.style.display = 'none';
+                        clearPreview();
+                        loadGalleryGroups();
+                        uploadBtn.disabled = false;
+                        progressFill.style.width = '0%';
+                        // Reset group selection
+                        newGroupRadio.checked = true;
+                        groupTitleInput.value = '';
+                        groupTitleInput.style.display = 'block';
+                        existingGroupSelect.style.display = 'none';
+                    }, 1000);
+                } catch (parseError) {
+                    console.error('Error parsing response:', parseError);
+                    throw new Error('Invalid server response');
+                }
             } else {
-                throw new Error('Upload failed');
+                let errorMessage = 'Upload failed';
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    errorMessage = errorResponse.error || errorMessage;
+                } catch (e) {
+                    // Use default error message
+                }
+                throw new Error(errorMessage);
             }
         });
 
         xhr.addEventListener('error', () => {
-            throw new Error('Upload failed');
+            isUploadComplete = true;
+            clearTimeout(uploadTimeout);
+            uploadProgress.style.display = 'none';
+            uploadBtn.disabled = false;
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Uploading...';
+            alert('Network error. Please check your connection and try again.');
+        });
+
+        xhr.addEventListener('abort', () => {
+            isUploadComplete = true;
+            clearTimeout(uploadTimeout);
+            uploadProgress.style.display = 'none';
+            uploadBtn.disabled = false;
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Uploading...';
+        });
+
+        xhr.addEventListener('loadend', () => {
+            // Cleanup timeout if request completes
+            clearTimeout(uploadTimeout);
         });
 
         xhr.open('POST', `${API_BASE_URL}/api/upload`);
         xhr.send(formData);
     } catch (error) {
-        alert('Failed to upload images. Please try again.');
+        clearTimeout(uploadTimeout);
         uploadProgress.style.display = 'none';
         uploadBtn.disabled = false;
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Uploading...';
+        alert(`Failed to upload images: ${error.message || 'Unknown error'}. Please try again.`);
     }
 }
 

@@ -22,13 +22,15 @@ This guide will help you set up the Homemade Delights website on Cloudflare Page
 
 ## Step 2: Connect Repository to Cloudflare Pages
 
-1. Go to Cloudflare Dashboard → Workers & Pages → Pages
+1. Go to Cloudflare Dashboard → **Workers & Pages** → **Pages** (NOT Workers!)
 2. Click "Create a project"
 3. Click "Connect to Git"
 4. Select your Git provider (GitHub, GitLab, etc.)
 5. Authorize Cloudflare to access your repositories
-6. Select the `HomeMadeDelights` repository
+6. **Select the `HomeMadeDelights` repository** (make sure you select the correct one)
 7. Click "Begin setup"
+
+**Note**: If you have an existing Worker, you'll create a separate Pages project. You can delete the Worker later once Pages is working.
 
 ## Step 3: Configure Build Settings
 

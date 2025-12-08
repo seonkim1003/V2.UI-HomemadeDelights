@@ -1,12 +1,16 @@
 name = "homemade-delights-gallery"
 compatibility_date = "2024-01-01"
 
-# Note: For Cloudflare Pages, bindings are configured in the dashboard
+# This file is for local development with `wrangler pages dev` only
+# For Cloudflare Pages deployment via Git, this file is optional
+# Pages automatically detects functions/ directory
+
+# For Cloudflare Pages deployment, bindings are configured in the dashboard:
 # Go to Pages project → Settings → Functions to add:
 # - R2 Bucket: GALLERY_R2 → gallery-images
 # - KV Namespace: GALLERY_KV → your-namespace-id
 
-# For local development with wrangler:
+# For local development with wrangler pages dev:
 # Uncomment and update these after creating resources:
 # [[r2_buckets]]
 # binding = "GALLERY_R2"
