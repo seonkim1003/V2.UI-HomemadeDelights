@@ -34,6 +34,7 @@ const slideshowClose = document.getElementById('slideshow-close');
 const slideshowPrev = document.getElementById('slideshow-prev');
 const slideshowNext = document.getElementById('slideshow-next');
 const deleteImageBtn = document.getElementById('delete-image-btn');
+const refreshGalleryBtn = document.getElementById('refresh-gallery-btn');
 const newGroupRadio = document.getElementById('new-group-radio');
 const existingGroupRadio = document.getElementById('existing-group-radio');
 const groupTitleInput = document.getElementById('group-title-input');
@@ -44,6 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setupUploadArea();
     setupGroupSelection();
     loadGalleryGroups();
+    
+    // Refresh button
+    if (refreshGalleryBtn) {
+        refreshGalleryBtn.addEventListener('click', () => {
+            console.log('Manual refresh triggered');
+            loadGalleryGroups();
+        });
+    }
     
     // Debug: Check bindings on load (remove in production)
     checkBindings();
@@ -321,20 +330,24 @@ async function uploadImages() {
                     // Clear preview immediately
                     clearPreview();
                     
-                    // Refresh gallery immediately
-                    loadGalleryGroups().then(() => {
-                        console.log('Gallery refreshed after upload');
-                        // Hide success message after gallery loads
-                        setTimeout(() => {
-                            uploadSuccess.style.display = 'none';
-                        }, 3000);
-                    }).catch(err => {
-                        console.error('Error refreshing gallery:', err);
-                        successMessage.textContent = '✓ Upload successful, but failed to refresh gallery. Please refresh the page manually.';
-                        setTimeout(() => {
-                            uploadSuccess.style.display = 'none';
-                        }, 5000);
-                    });
+                    // Wait a moment for KV to be consistent, then refresh gallery
+                    console.log('Upload successful, waiting before refresh...');
+                    setTimeout(() => {
+                        console.log('Refreshing gallery after upload...');
+                        loadGalleryGroups().then(() => {
+                            console.log('✅ Gallery refreshed after upload');
+                            // Hide success message after gallery loads
+                            setTimeout(() => {
+                                uploadSuccess.style.display = 'none';
+                            }, 3000);
+                        }).catch(err => {
+                            console.error('❌ Error refreshing gallery:', err);
+                            successMessage.textContent = '✓ Upload successful, but failed to refresh gallery. Please refresh the page manually.';
+                            setTimeout(() => {
+                                uploadSuccess.style.display = 'none';
+                            }, 5000);
+                        });
+                    }, 1000); // Wait 1 second for KV consistency
                     
                     // Hide progress after showing success
                     setTimeout(() => {
@@ -454,8 +467,14 @@ async function loadGalleryGroups() {
         }
         
         const groups = await response.json();
-        console.log('Loaded groups:', groups);
+        console.log('✅ Loaded groups from API:', groups);
+        console.log('Number of groups:', groups?.length || 0);
         allGroups = groups || [];
+        
+        if (allGroups.length === 0) {
+            console.log('No groups found in response');
+        }
+        
         await displayGallery();
     } catch (error) {
         console.error('Error loading groups:', error);
@@ -480,21 +499,26 @@ async function displayGallery() {
     // Get all images first
     let allImages = [];
     try {
+        console.log('Fetching images from API...');
         const imagesResponse = await fetch(`${API_BASE_URL}/api/images`);
         if (imagesResponse.ok) {
             allImages = await imagesResponse.json();
-            console.log('Loaded images:', allImages.length);
+            console.log('✅ Loaded images:', allImages.length, 'images');
+            console.log('Image details:', allImages);
         } else {
-            console.warn('Failed to load images:', imagesResponse.status);
+            const errorText = await imagesResponse.text();
+            console.warn('❌ Failed to load images:', imagesResponse.status, errorText);
         }
     } catch (error) {
-        console.error('Error loading images:', error);
+        console.error('❌ Error loading images:', error);
     }
 
     // Create group cards
+    console.log('Creating group cards for', allGroups.length, 'groups');
     for (const group of allGroups) {
         const groupImages = allImages.filter(img => img.groupId === group.id);
-        console.log(`Group "${group.title}": ${groupImages.length} images`);
+        console.log(`Group "${group.title}" (ID: ${group.id}): ${groupImages.length} images`);
+        console.log('Group images:', groupImages);
         
         const groupCard = document.createElement('div');
         groupCard.className = 'group-card';
@@ -504,19 +528,28 @@ async function displayGallery() {
         const coverImg = document.createElement('img');
         coverImg.className = 'group-cover';
         if (group.coverImage && groupImages.length > 0) {
-            coverImg.src = `${API_BASE_URL}${group.coverImage}`;
+            const coverUrl = `${API_BASE_URL}${group.coverImage}`;
+            console.log(`Setting cover image for "${group.title}":`, coverUrl);
+            coverImg.src = coverUrl;
         } else if (groupImages.length > 0) {
             // Use first image as cover if no cover set
-            coverImg.src = `${API_BASE_URL}${groupImages[0].path}`;
+            const firstImageUrl = `${API_BASE_URL}${groupImages[0].path}`;
+            console.log(`Using first image as cover for "${group.title}":`, firstImageUrl);
+            coverImg.src = firstImageUrl;
         } else {
             // Placeholder if no images
+            console.log(`No images for group "${group.title}", using placeholder`);
             coverImg.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3ENo Images%3C/text%3E%3C/svg%3E';
         }
         coverImg.alt = group.title;
         coverImg.loading = 'lazy';
         coverImg.onerror = function() {
-            console.error('Failed to load image:', this.src);
+            console.error('❌ Failed to load image:', this.src);
+            console.error('Image URL was:', this.src);
             this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage Error%3C/text%3E%3C/svg%3E';
+        };
+        coverImg.onload = function() {
+            console.log('✅ Successfully loaded image:', this.src);
         };
 
         // Group info overlay

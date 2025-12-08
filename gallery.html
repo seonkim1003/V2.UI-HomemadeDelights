@@ -121,7 +121,10 @@
 
                 <!-- Gallery Grid -->
                 <div class="gallery-section fade-in">
-                    <h3 data-translate="Community Gallery">Community Gallery</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0;" data-translate="Community Gallery">Community Gallery</h3>
+                        <button class="btn btn-secondary" id="refresh-gallery-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Refresh">Refresh</button>
+                    </div>
                     <div class="gallery-grid" id="gallery-grid">
                         <div class="loading-spinner" id="loading-spinner">
                             <div class="spinner"></div>

@@ -468,10 +468,20 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
 
     // Save to KV
     try {
+      console.log('Saving to KV - images:', images.length, 'groups:', groups.length);
       await setKVData(kvBinding, 'images', images);
       console.log('✅ Saved images to KV, total:', images.length);
+      
+      // Verify images were saved
+      const verifyImages = await getKVData(kvBinding, 'images', []);
+      console.log('✅ Verified images in KV:', verifyImages.length);
+      
       await setKVData(kvBinding, 'groups', groups);
       console.log('✅ Saved groups to KV, total:', groups.length);
+      
+      // Verify groups were saved
+      const verifyGroups = await getKVData(kvBinding, 'groups', []);
+      console.log('✅ Verified groups in KV:', verifyGroups.length);
     } catch (kvError) {
       console.error('❌ Error saving to KV:', kvError);
       return new Response(JSON.stringify({ 
@@ -486,14 +496,17 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       imagesUploaded: newImages.length,
       totalImages: images.length,
       groupId: targetGroup.id,
-      groupTitle: targetGroup.title
+      groupTitle: targetGroup.title,
+      groupImages: targetGroup.images.length
     });
 
     return new Response(JSON.stringify({
       success: true,
       message: `${newImages.length} image(s) uploaded successfully`,
       images: newImages,
-      group: targetGroup
+      group: targetGroup,
+      totalImages: images.length,
+      totalGroups: groups.length
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
