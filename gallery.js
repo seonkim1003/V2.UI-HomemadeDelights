@@ -43,7 +43,27 @@ document.addEventListener('DOMContentLoaded', () => {
     setupUploadArea();
     setupGroupSelection();
     loadGalleryGroups();
+    
+    // Debug: Check bindings on load (remove in production)
+    checkBindings();
 });
+
+// Debug function to check bindings
+async function checkBindings() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/debug/bindings`);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Bindings Status:', data);
+            if (!data.bindings.GALLERY_R2.includes('✅') || !data.bindings.GALLERY_KV.includes('✅')) {
+                console.warn('⚠️ Bindings not configured:', data);
+                console.warn('Available environment keys:', data.allEnvKeys);
+            }
+        }
+    } catch (error) {
+        console.error('Error checking bindings:', error);
+    }
+}
 
 // ==================== Upload Functionality ====================
 
@@ -352,7 +372,22 @@ async function uploadImages() {
                     if (errorMessage.includes('binding not configured') || 
                         errorMessage.includes('R2') || 
                         errorMessage.includes('KV')) {
-                        errorMessage += '\n\nPlease configure R2 and KV bindings in Cloudflare Pages:\nSettings → Functions → Bindings';
+                        try {
+                            const errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.troubleshooting) {
+                                errorMessage += '\n\n' + errorResponse.troubleshooting.join('\n');
+                            }
+                            if (errorResponse.availableBindings) {
+                                errorMessage += '\n\nAvailable bindings found: ' + errorResponse.availableBindings;
+                                errorMessage += '\n\nNOTE: If you see bindings listed but still get this error,';
+                                errorMessage += '\nthe variable names might not match exactly.';
+                                errorMessage += '\nRequired: GALLERY_R2 and GALLERY_KV (all caps, exact match)';
+                            }
+                            // Suggest checking debug endpoint
+                            errorMessage += '\n\nCheck /api/debug/bindings for detailed binding status';
+                        } catch (e) {
+                            errorMessage += '\n\nIMPORTANT: After adding bindings, you MUST redeploy!\n1. Go to Deployments → Retry deployment\n2. Or push a new commit';
+                        }
                     }
                 } catch (e) {
                     errorMessage += '\n\nResponse: ' + xhr.responseText.substring(0, 200);

@@ -50,6 +50,11 @@ export async function onRequest(context) {
     return handleDeleteImage(imageId, env, corsHeaders);
   }
 
+  // Debug endpoint to check bindings
+  if (path === '/api/debug/bindings' && request.method === 'GET') {
+    return handleDebugBindings(env, corsHeaders);
+  }
+
   return new Response('Not Found', { status: 404, headers: corsHeaders });
 }
 
@@ -245,8 +250,20 @@ async function handleUpload(request, env, corsHeaders) {
 
     // Check if R2 binding exists
     if (!env.GALLERY_R2) {
+      const availableBindings = Object.keys(env).filter(key => 
+        key.includes('R2') || key.includes('KV') || key.includes('r2') || key.includes('kv')
+      );
       return new Response(JSON.stringify({ 
-        error: 'R2 bucket binding not configured. Please configure GALLERY_R2 binding in Cloudflare Pages Settings → Functions.' 
+        error: 'R2 bucket binding not configured.',
+        details: 'Please configure GALLERY_R2 binding in Cloudflare Pages Settings → Functions.',
+        troubleshooting: [
+          '1. Go to Pages → Settings → Functions → Bindings',
+          '2. Add R2 Bucket binding with variable name: GALLERY_R2 (must be exact, all caps)',
+          '3. Select bucket: gallery-images',
+          '4. Save and REDEPLOY (retry deployment or push new commit)',
+          '5. Bindings only work after redeployment!'
+        ],
+        availableBindings: availableBindings.length > 0 ? availableBindings : 'No R2/KV bindings found'
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -255,8 +272,20 @@ async function handleUpload(request, env, corsHeaders) {
 
     // Check if KV binding exists
     if (!env.GALLERY_KV) {
+      const availableBindings = Object.keys(env).filter(key => 
+        key.includes('R2') || key.includes('KV') || key.includes('r2') || key.includes('kv')
+      );
       return new Response(JSON.stringify({ 
-        error: 'KV namespace binding not configured. Please configure GALLERY_KV binding in Cloudflare Pages Settings → Functions.' 
+        error: 'KV namespace binding not configured.',
+        details: 'Please configure GALLERY_KV binding in Cloudflare Pages Settings → Functions.',
+        troubleshooting: [
+          '1. Go to Pages → Settings → Functions → Bindings',
+          '2. Add KV Namespace binding with variable name: GALLERY_KV (must be exact, all caps)',
+          '3. Select your KV namespace',
+          '4. Save and REDEPLOY (retry deployment or push new commit)',
+          '5. Bindings only work after redeployment!'
+        ],
+        availableBindings: availableBindings.length > 0 ? availableBindings : 'No R2/KV bindings found'
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -409,4 +438,34 @@ async function handleDeleteImage(imageId, env, corsHeaders) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+}
+
+// GET /api/debug/bindings - Debug endpoint to check bindings
+async function handleDebugBindings(env, corsHeaders) {
+  const allEnvKeys = Object.keys(env);
+  const r2Bindings = allEnvKeys.filter(key => 
+    key.includes('R2') || key.includes('r2') || key.toLowerCase().includes('gallery')
+  );
+  const kvBindings = allEnvKeys.filter(key => 
+    key.includes('KV') || key.includes('kv') || key.toLowerCase().includes('gallery')
+  );
+
+  const hasGALLERY_R2 = !!env.GALLERY_R2;
+  const hasGALLERY_KV = !!env.GALLERY_KV;
+
+  return new Response(JSON.stringify({
+    bindings: {
+      GALLERY_R2: hasGALLERY_R2 ? '✅ Configured' : '❌ Not found',
+      GALLERY_KV: hasGALLERY_KV ? '✅ Configured' : '❌ Not found',
+    },
+    allEnvKeys: allEnvKeys,
+    r2Related: r2Bindings,
+    kvRelated: kvBindings,
+    environment: env.ENVIRONMENT || 'production',
+    message: hasGALLERY_R2 && hasGALLERY_KV 
+      ? 'All bindings are configured correctly!' 
+      : 'Some bindings are missing. Check variable names match exactly: GALLERY_R2 and GALLERY_KV'
+  }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
 }
