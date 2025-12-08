@@ -372,8 +372,8 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       const uniqueSuffix = Date.now() + '-' + i + '-' + Math.round(Math.random() * 1E9);
       const ext = file.name.split('.').pop() || 'jpg';
       const imageName = `image-${uniqueSuffix}.${ext}`;
-      // Store in R2 with gallery-image/ directory prefix
-      const r2Key = `gallery-image/${imageName}`;
+      // Store in R2 with gallery-images/ directory prefix (matches bucket structure)
+      const r2Key = `gallery-images/${imageName}`;
 
       // Upload to R2
       try {
@@ -467,7 +467,7 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       // Store the full R2 key (with directory) in filename, and use it in the path
       const imageRecord = {
         id: imageId,
-        filename: r2Key, // Full R2 key including directory: gallery-image/image-123.jpg
+        filename: r2Key, // Full R2 key including directory: gallery-images/image-123.jpg
         originalName: file.name,
         path: `/api/image/${r2Key}`, // API path includes the directory
         groupId: targetGroup.id,
@@ -555,27 +555,42 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       });
     }
     
-    // The filename from URL may or may not include gallery-image/ prefix
+    // The filename from URL may or may not include gallery-images/ prefix
     // Handle both cases for backward compatibility
     let r2Key = filename;
-    if (!filename.startsWith('gallery-image/')) {
-      // If old format (no prefix), try with prefix first, then fallback
-      r2Key = `gallery-image/${filename}`;
+    if (!filename.startsWith('gallery-images/') && !filename.startsWith('gallery-image/')) {
+      // If old format (no prefix), try with gallery-images/ prefix first
+      r2Key = `gallery-images/${filename}`;
       console.log('🔍 Fetching image from R2 (with prefix):', r2Key);
     } else {
-      console.log('🔍 Fetching image from R2:', r2Key);
+      // If it has gallery-image/ (old), update to gallery-images/
+      if (filename.startsWith('gallery-image/')) {
+        r2Key = filename.replace('gallery-image/', 'gallery-images/');
+        console.log('🔍 Updating old path to new format:', r2Key);
+      } else {
+        console.log('🔍 Fetching image from R2:', r2Key);
+      }
     }
     
     let object;
     try {
       object = await r2Binding.get(r2Key);
-      // If not found with prefix, try without (for backward compatibility)
-      if (!object && filename.startsWith('gallery-image/')) {
-        const fallbackKey = filename.replace('gallery-image/', '');
-        console.log('⚠️ Not found with prefix, trying without:', fallbackKey);
+      // If not found with gallery-images/, try gallery-image/ (backward compatibility)
+      if (!object && filename.startsWith('gallery-images/')) {
+        const fallbackKey = filename.replace('gallery-images/', 'gallery-image/');
+        console.log('⚠️ Not found with gallery-images/, trying gallery-image/:', fallbackKey);
         object = await r2Binding.get(fallbackKey);
         if (object) {
           r2Key = fallbackKey;
+        }
+      }
+      // Also try root level as last resort
+      if (!object && (filename.startsWith('gallery-images/') || filename.startsWith('gallery-image/'))) {
+        const rootKey = filename.replace(/^gallery-images?\//, '');
+        console.log('⚠️ Not found with prefix, trying root level:', rootKey);
+        object = await r2Binding.get(rootKey);
+        if (object) {
+          r2Key = rootKey;
         }
       }
     } catch (getError) {
@@ -932,13 +947,29 @@ async function handleTestImage(r2Binding, corsHeaders) {
       });
     }
 
-    // List objects in R2 - list from gallery-image/ directory
+    // List objects in R2 - list from gallery-images/ directory (matches bucket URL structure)
     const listResult = await r2Binding.list({ 
-      prefix: 'gallery-image/',
+      prefix: 'gallery-images/',
       limit: 10 
     });
     
     if (!listResult || !listResult.objects || listResult.objects.length === 0) {
+      // Also check gallery-image/ (old format) for backward compatibility
+      const oldList = await r2Binding.list({ prefix: 'gallery-image/', limit: 10 });
+      if (oldList && oldList.objects && oldList.objects.length > 0) {
+        return new Response(JSON.stringify({
+          message: 'Found images in R2 (gallery-image/ directory - old format)',
+          totalObjects: oldList.objects.length,
+          allObjects: oldList.objects.map(obj => ({
+            key: obj.key,
+            size: obj.size,
+            url: `/api/image/${encodeURIComponent(obj.key)}`
+          }))
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       // Also check root level for backward compatibility
       const rootList = await r2Binding.list({ limit: 10 });
       if (rootList && rootList.objects && rootList.objects.length > 0) {
@@ -956,7 +987,7 @@ async function handleTestImage(r2Binding, corsHeaders) {
       }
       
       return new Response(JSON.stringify({ 
-        message: 'No images found in R2 (checked gallery-image/ directory and root)',
+        message: 'No images found in R2 (checked gallery-images/, gallery-image/, and root)',
         objects: []
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -966,18 +997,20 @@ async function handleTestImage(r2Binding, corsHeaders) {
     const firstObject = listResult.objects[0];
     
     return new Response(JSON.stringify({
-      message: 'Found images in R2 (gallery-image/ directory)',
+      message: 'Found images in R2 (gallery-images/ directory)',
       totalObjects: listResult.objects.length,
       firstImage: {
         key: firstObject.key,
         size: firstObject.size,
         uploaded: firstObject.uploaded,
-        url: `/api/image/${encodeURIComponent(firstObject.key)}`
+        url: `/api/image/${encodeURIComponent(firstObject.key)}`,
+        r2Url: `https://cb65fdffd4a962486bba237fb4595848.r2.cloudflarestorage.com/${firstObject.key}`
       },
       allObjects: listResult.objects.map(obj => ({
         key: obj.key,
         size: obj.size,
-        url: `/api/image/${encodeURIComponent(obj.key)}`
+        url: `/api/image/${encodeURIComponent(obj.key)}`,
+        r2Url: `https://cb65fdffd4a962486bba237fb4595848.r2.cloudflarestorage.com/${obj.key}`
       }))
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
