@@ -372,19 +372,45 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       try {
         // Ensure we have a valid content type
         const contentType = file.type || 'image/jpeg';
-        console.log('Uploading to R2:', filename, 'Content-Type:', contentType);
+        console.log('Uploading to R2:', filename, 'Content-Type:', contentType, 'Size:', file.size);
         
-        await r2Binding.put(filename, file.stream(), {
+        // Convert file to ArrayBuffer for R2 upload
+        // FormData files in Workers are Blobs, we need to convert to ArrayBuffer
+        let fileBody;
+        if (file instanceof Blob) {
+          fileBody = await file.arrayBuffer();
+        } else if (file.stream) {
+          // If it has a stream method, use it
+          fileBody = file.stream();
+        } else {
+          // Fallback: try to read as array buffer
+          fileBody = await file.arrayBuffer();
+        }
+        
+        console.log('File body type:', typeof fileBody, 'Is ArrayBuffer:', fileBody instanceof ArrayBuffer);
+        
+        // Upload to R2 - R2 accepts ArrayBuffer, ReadableStream, or Blob
+        await r2Binding.put(filename, fileBody, {
           httpMetadata: {
             contentType: contentType,
           },
         });
         
         console.log('Successfully uploaded to R2:', filename);
+        
+        // Verify upload by trying to get it back
+        const verify = await r2Binding.get(filename);
+        if (!verify) {
+          console.error('Upload verification failed - object not found after upload:', filename);
+          throw new Error('Upload verification failed');
+        }
+        console.log('Upload verified - object exists in R2:', filename, 'Size:', verify.size);
       } catch (r2Error) {
         console.error('R2 upload error:', r2Error);
+        console.error('Error stack:', r2Error.stack);
         return new Response(JSON.stringify({ 
-          error: 'Failed to upload to R2: ' + r2Error.message 
+          error: 'Failed to upload to R2: ' + r2Error.message,
+          details: r2Error.stack
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
