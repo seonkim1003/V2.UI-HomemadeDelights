@@ -372,45 +372,61 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       try {
         // Ensure we have a valid content type
         const contentType = file.type || 'image/jpeg';
-        console.log('Uploading to R2:', filename, 'Content-Type:', contentType, 'Size:', file.size);
+        console.log('Uploading to R2:', filename, 'Content-Type:', contentType, 'Size:', file.size, 'Type:', typeof file);
         
         // Convert file to ArrayBuffer for R2 upload
-        // FormData files in Workers are Blobs, we need to convert to ArrayBuffer
+        // In Cloudflare Workers, FormData files are File objects (which extend Blob)
         let fileBody;
-        if (file instanceof Blob) {
-          fileBody = await file.arrayBuffer();
-        } else if (file.stream) {
-          // If it has a stream method, use it
-          fileBody = file.stream();
-        } else {
-          // Fallback: try to read as array buffer
-          fileBody = await file.arrayBuffer();
+        try {
+          // File objects have arrayBuffer() method
+          if (file && typeof file.arrayBuffer === 'function') {
+            fileBody = await file.arrayBuffer();
+            console.log('Converted to ArrayBuffer, size:', fileBody.byteLength);
+          } else if (file instanceof Blob) {
+            fileBody = await file.arrayBuffer();
+            console.log('Converted Blob to ArrayBuffer, size:', fileBody.byteLength);
+          } else if (file && file.stream) {
+            // Use stream if available
+            fileBody = file.stream();
+            console.log('Using file stream');
+          } else {
+            throw new Error('File object does not have arrayBuffer() method or is not a Blob');
+          }
+        } catch (conversionError) {
+          console.error('File conversion error:', conversionError);
+          throw new Error('Failed to convert file to uploadable format: ' + conversionError.message);
         }
         
-        console.log('File body type:', typeof fileBody, 'Is ArrayBuffer:', fileBody instanceof ArrayBuffer);
+        if (!fileBody) {
+          throw new Error('File body is null or undefined after conversion');
+        }
         
         // Upload to R2 - R2 accepts ArrayBuffer, ReadableStream, or Blob
-        await r2Binding.put(filename, fileBody, {
+        console.log('Calling R2 put for:', filename);
+        const putResult = await r2Binding.put(filename, fileBody, {
           httpMetadata: {
             contentType: contentType,
           },
         });
+        console.log('R2 put completed:', filename, 'Result:', putResult);
         
-        console.log('Successfully uploaded to R2:', filename);
-        
-        // Verify upload by trying to get it back
+        // Verify upload by trying to get it back (with a small delay to ensure consistency)
+        await new Promise(resolve => setTimeout(resolve, 100));
         const verify = await r2Binding.get(filename);
         if (!verify) {
           console.error('Upload verification failed - object not found after upload:', filename);
-          throw new Error('Upload verification failed');
+          throw new Error('Upload verification failed - file not found in R2 after upload');
         }
-        console.log('Upload verified - object exists in R2:', filename, 'Size:', verify.size);
+        console.log('✅ Upload verified - object exists in R2:', filename, 'Size:', verify.size, 'Content-Type:', verify.httpMetadata?.contentType);
       } catch (r2Error) {
-        console.error('R2 upload error:', r2Error);
+        console.error('❌ R2 upload error for', filename, ':', r2Error);
+        console.error('Error name:', r2Error.name);
+        console.error('Error message:', r2Error.message);
         console.error('Error stack:', r2Error.stack);
         return new Response(JSON.stringify({ 
           error: 'Failed to upload to R2: ' + r2Error.message,
-          details: r2Error.stack
+          filename: filename,
+          details: r2Error.stack || 'No stack trace available'
         }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -446,8 +462,27 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
     }
 
     // Save to KV
-    await setKVData(kvBinding, 'images', images);
-    await setKVData(kvBinding, 'groups', groups);
+    try {
+      await setKVData(kvBinding, 'images', images);
+      console.log('✅ Saved images to KV, total:', images.length);
+      await setKVData(kvBinding, 'groups', groups);
+      console.log('✅ Saved groups to KV, total:', groups.length);
+    } catch (kvError) {
+      console.error('❌ Error saving to KV:', kvError);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to save metadata: ' + kvError.message 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('✅ Upload complete:', {
+      imagesUploaded: newImages.length,
+      totalImages: images.length,
+      groupId: targetGroup.id,
+      groupTitle: targetGroup.title
+    });
 
     return new Response(JSON.stringify({
       success: true,
@@ -523,11 +558,11 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       headers.set('etag', object.httpEtag);
     }
 
-    console.log('Serving image:', filename, 'Content-Type:', headers.get('Content-Type'), 'Body type:', typeof object.body, 'Body null?', object.body === null);
+    console.log('✅ Serving image:', filename, 'Content-Type:', headers.get('Content-Type'), 'Size:', object.size, 'Body type:', typeof object.body);
 
     // Handle the object body - R2 objects return a ReadableStream
     if (!object.body) {
-      console.error('Object body is null for:', filename);
+      console.error('❌ Object body is null for:', filename);
       return new Response('Image data not available', {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
@@ -535,6 +570,7 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
     }
     
     // Return the response with the stream
+    // R2 object.body is a ReadableStream that can be passed directly to Response
     return new Response(object.body, {
       headers,
     });
