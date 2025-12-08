@@ -115,6 +115,11 @@ export async function onRequest(context) {
     return handleDeleteImage(imageId, GALLERY_R2, GALLERY_KV, corsHeaders);
   }
 
+  if (path.startsWith('/api/groups/') && request.method === 'DELETE') {
+    const groupId = path.split('/api/groups/')[1];
+    return handleDeleteGroup(groupId, GALLERY_R2, GALLERY_KV, corsHeaders);
+  }
+
   // Test bindings endpoint - actually tests R2/KV operations
   if (path === '/api/test-bindings' && request.method === 'GET') {
     return handleTestBindings(GALLERY_R2, GALLERY_KV, env, corsHeaders);
@@ -601,9 +606,12 @@ async function handleDeleteImage(imageId, r2Binding, kvBinding, corsHeaders) {
     // Delete from R2
     if (r2Binding) {
       try {
+        console.log('Deleting image from R2:', image.filename);
         await r2Binding.delete(image.filename);
+        console.log('✅ Image deleted from R2:', image.filename);
       } catch (error) {
         console.error('Error deleting from R2:', error);
+        // Continue even if R2 delete fails - we'll still remove from metadata
       }
     }
 
@@ -620,16 +628,82 @@ async function handleDeleteImage(imageId, r2Binding, kvBinding, corsHeaders) {
         // Update cover if it was the deleted image
         if (group.coverImage === image.path) {
           group.coverImage = null;
+          // Set new cover if there are other images
+          if (group.images.length > 0) {
+            const remainingImage = images.find(img => img.id === group.images[0]);
+            if (remainingImage) {
+              group.coverImage = remainingImage.path;
+            }
+          }
         }
       }
     }
     await setKVData(kvBinding, 'groups', groups);
 
+    console.log('✅ Image deleted successfully:', imageId);
     return new Response(JSON.stringify({ success: true, message: 'Image deleted successfully' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
+    console.error('❌ Error deleting image:', error);
     return new Response(JSON.stringify({ error: 'Failed to delete image: ' + error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+// DELETE /api/groups/:id - Delete entire group and all its images
+async function handleDeleteGroup(groupId, r2Binding, kvBinding, corsHeaders) {
+  try {
+    const groups = await getKVData(kvBinding, 'groups', []);
+    const groupIndex = groups.findIndex(g => g.id === groupId);
+
+    if (groupIndex === -1) {
+      return new Response(JSON.stringify({ error: 'Group not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const group = groups[groupIndex];
+    const images = await getKVData(kvBinding, 'images', []);
+
+    // Delete all images in the group from R2
+    if (r2Binding) {
+      const groupImages = images.filter(img => img.groupId === groupId);
+      console.log(`Deleting ${groupImages.length} images from R2 for group:`, groupId);
+      
+      for (const image of groupImages) {
+        try {
+          await r2Binding.delete(image.filename);
+          console.log('✅ Deleted from R2:', image.filename);
+        } catch (error) {
+          console.error('Error deleting image from R2:', image.filename, error);
+          // Continue deleting other images even if one fails
+        }
+      }
+    }
+
+    // Remove all images in the group from images array
+    const remainingImages = images.filter(img => img.groupId !== groupId);
+    await setKVData(kvBinding, 'images', remainingImages);
+
+    // Remove the group
+    groups.splice(groupIndex, 1);
+    await setKVData(kvBinding, 'groups', groups);
+
+    console.log('✅ Group deleted successfully:', groupId, 'Title:', group.title);
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: `Group "${group.title}" and all its images deleted successfully`,
+      deletedImages: group.images.length
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('❌ Error deleting group:', error);
+    return new Response(JSON.stringify({ error: 'Failed to delete group: ' + error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -33,6 +33,7 @@ const slideshowCounter = document.getElementById('slideshow-counter');
 const slideshowClose = document.getElementById('slideshow-close');
 const slideshowPrev = document.getElementById('slideshow-prev');
 const slideshowNext = document.getElementById('slideshow-next');
+const deleteImageBtn = document.getElementById('delete-image-btn');
 const newGroupRadio = document.getElementById('new-group-radio');
 const existingGroupRadio = document.getElementById('existing-group-radio');
 const groupTitleInput = document.getElementById('group-title-input');
@@ -533,11 +534,22 @@ async function displayGallery() {
             (document.querySelector('[data-translate="images"]')?.textContent || 'images');
         groupCount.textContent = `${groupImages.length} ${imageText}`;
 
+        // Delete button for group
+        const deleteGroupBtn = document.createElement('button');
+        deleteGroupBtn.className = 'delete-group-btn';
+        deleteGroupBtn.innerHTML = '🗑️';
+        deleteGroupBtn.title = 'Delete Group';
+        deleteGroupBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent opening slideshow
+            deleteGroup(group.id, group.title);
+        });
+
         groupInfo.appendChild(groupTitle);
         groupInfo.appendChild(groupCount);
         
         groupCard.appendChild(coverImg);
         groupCard.appendChild(groupInfo);
+        groupCard.appendChild(deleteGroupBtn);
 
         groupCard.addEventListener('click', () => {
             openGroupSlideshow(group.id, groupImages);
@@ -586,10 +598,104 @@ function showPrevImage() {
     updateSlideshowImage();
 }
 
+// Delete functionality
+async function deleteImage(imageId) {
+    if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/images/${imageId}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            console.log('✅ Image deleted:', imageId);
+            
+            // Remove from current slideshow
+            const imageIndex = currentGroupImages.findIndex(img => img.id === imageId);
+            if (imageIndex !== -1) {
+                currentGroupImages.splice(imageIndex, 1);
+                
+                // Adjust index if needed
+                if (currentSlideshowIndex >= currentGroupImages.length) {
+                    currentSlideshowIndex = Math.max(0, currentGroupImages.length - 1);
+                }
+                
+                // If no images left, close slideshow
+                if (currentGroupImages.length === 0) {
+                    closeSlideshow();
+                    loadGalleryGroups(); // Refresh gallery
+                    return;
+                }
+                
+                updateSlideshowImage();
+            }
+            
+            // Refresh gallery
+            loadGalleryGroups();
+        } else {
+            alert('Failed to delete image: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        alert('Error deleting image. Please try again.');
+    }
+}
+
+async function deleteGroup(groupId, groupTitle) {
+    if (!confirm(`Are you sure you want to delete the group "${groupTitle}" and all its images? This action cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/groups/${groupId}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            console.log('✅ Group deleted:', groupId);
+            
+            // Close slideshow if it's open for this group
+            if (currentGroupImages.length > 0) {
+                const firstImage = currentGroupImages[0];
+                if (firstImage && firstImage.groupId === groupId) {
+                    closeSlideshow();
+                }
+            }
+            
+            // Refresh gallery
+            loadGalleryGroups();
+        } else {
+            alert('Failed to delete group: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting group:', error);
+        alert('Error deleting group. Please try again.');
+    }
+}
+
 // Slideshow event listeners
 slideshowClose.addEventListener('click', closeSlideshow);
 slideshowNext.addEventListener('click', showNextImage);
 slideshowPrev.addEventListener('click', showPrevImage);
+
+// Delete image button event listener
+if (deleteImageBtn) {
+    deleteImageBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent any event bubbling
+        if (currentGroupImages.length > 0) {
+            const currentImage = currentGroupImages[currentSlideshowIndex];
+            if (currentImage) {
+                deleteImage(currentImage.id);
+            }
+        }
+    });
+}
 
 // Close on backdrop click
 slideshowModal.addEventListener('click', (e) => {
