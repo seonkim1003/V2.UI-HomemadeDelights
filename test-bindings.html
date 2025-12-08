@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Bindings Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result.success {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .result.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .result.loading {
+            border-color: #ffc107;
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-badge.success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-badge.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-badge.warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .info-box h3 {
+            color: #1976D2;
+            margin-bottom: 8px;
+        }
+        
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Cloudflare Bindings Test Page</h1>
+        <p class="subtitle">Test R2 and KV bindings for your gallery application</p>
+        
+        <div class="info-box">
+            <h3>📋 How to Use</h3>
+            <p>
+                Click each test button to verify your Cloudflare Pages bindings are configured correctly.
+                Make sure you've configured R2 and KV bindings in <strong>Pages → Settings → Functions → Bindings</strong>
+                and redeployed your project.
+            </p>
+        </div>
+        
+        <!-- Test 1: Check Bindings -->
+        <div class="test-section">
+            <h2>1. Check Bindings Detection <span id="bindings-status"></span></h2>
+            <p>Verify that R2 and KV bindings are detected by the Worker function.</p>
+            <button onclick="testBindings()">Test Bindings Detection</button>
+            <div id="bindings-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Test 2: Test R2 Operations -->
+        <div class="test-section">
+            <h2>2. Test R2 Operations <span id="r2-status"></span></h2>
+            <p>Test if R2 bucket is accessible and can perform list operations.</p>
+            <button onclick="testR2Operations()">Test R2 List</button>
+            <button onclick="testR2Upload()">Test R2 Upload</button>
+            <div id="r2-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Test 3: Test KV Operations -->
+        <div class="test-section">
+            <h2>3. Test KV Operations <span id="kv-status"></span></h2>
+            <p>Test if KV namespace is accessible and can perform read/write operations.</p>
+            <button onclick="testKVOperations()">Test KV Read/Write</button>
+            <div id="kv-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Test 4: Test Image Serving -->
+        <div class="test-section">
+            <h2>4. Test Image Serving <span id="image-status"></span></h2>
+            <p>List images in R2 and test if they can be served via the API.</p>
+            <button onclick="testImageServing()">List Images in R2</button>
+            <div id="image-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Test 5: Full Integration Test -->
+        <div class="test-section">
+            <h2>5. Full Integration Test <span id="integration-status"></span></h2>
+            <p>Run all tests together to verify complete functionality.</p>
+            <button onclick="runAllTests()">Run All Tests</button>
+            <div id="integration-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = window.location.origin;
+        
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.textContent = content;
+        }
+        
+        function updateStatus(elementId, status, text) {
+            const element = document.getElementById(elementId);
+            element.className = `status-badge ${status}`;
+            element.textContent = text;
+        }
+        
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = '<span class="loading-spinner"></span>Loading...';
+            element.style.display = 'block';
+            element.className = 'result loading';
+        }
+        
+        async function testBindings() {
+            showLoading('bindings-result');
+            updateStatus('bindings-status', 'warning', 'Testing...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/debug/bindings`);
+                const data = await response.json();
+                
+                const resultText = JSON.stringify(data, null, 2);
+                
+                if (data.bindings.R2.includes('✅') && data.bindings.KV.includes('✅')) {
+                    showResult('bindings-result', resultText, 'success');
+                    updateStatus('bindings-status', 'success', '✅ Pass');
+                } else {
+                    showResult('bindings-result', resultText, 'error');
+                    updateStatus('bindings-status', 'error', '❌ Fail');
+                }
+            } catch (error) {
+                showResult('bindings-result', `Error: ${error.message}\n\nStack: ${error.stack}`, 'error');
+                updateStatus('bindings-status', 'error', '❌ Error');
+            }
+        }
+        
+        async function testR2Operations() {
+            showLoading('r2-result');
+            updateStatus('r2-status', 'warning', 'Testing...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test-image`);
+                const data = await response.json();
+                
+                const resultText = JSON.stringify(data, null, 2);
+                
+                if (response.ok && !data.error) {
+                    showResult('r2-result', resultText, 'success');
+                    updateStatus('r2-status', 'success', '✅ Pass');
+                } else {
+                    showResult('r2-result', resultText, 'error');
+                    updateStatus('r2-status', 'error', '❌ Fail');
+                }
+            } catch (error) {
+                showResult('r2-result', `Error: ${error.message}\n\nStack: ${error.stack}`, 'error');
+                updateStatus('r2-status', 'error', '❌ Error');
+            }
+        }
+        
+        async function testR2Upload() {
+            showLoading('r2-result');
+            updateStatus('r2-status', 'warning', 'Testing...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test-upload`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                const resultText = JSON.stringify(data, null, 2);
+                
+                if (response.ok && data.success) {
+                    showResult('r2-result', resultText, 'success');
+                    updateStatus('r2-status', 'success', '✅ Pass');
+                } else {
+                    showResult('r2-result', resultText, 'error');
+                    updateStatus('r2-status', 'error', '❌ Fail');
+                }
+            } catch (error) {
+                showResult('r2-result', `Error: ${error.message}\n\nStack: ${error.stack}`, 'error');
+                updateStatus('r2-status', 'error', '❌ Error');
+            }
+        }
+        
+        async function testKVOperations() {
+            showLoading('kv-result');
+            updateStatus('kv-status', 'warning', 'Testing...');
+            
+            try {
+                // Test KV by trying to read groups (which uses KV)
+                const response = await fetch(`${API_BASE_URL}/api/groups`);
+                const data = await response.json();
+                
+                const resultText = `KV Read Test (groups endpoint):\n${JSON.stringify(data, null, 2)}\n\n` +
+                    `✅ KV is accessible if you see this response (even if groups array is empty)`;
+                
+                if (response.ok) {
+                    showResult('kv-result', resultText, 'success');
+                    updateStatus('kv-status', 'success', '✅ Pass');
+                } else {
+                    showResult('kv-result', `KV Error: ${JSON.stringify(data, null, 2)}`, 'error');
+                    updateStatus('kv-status', 'error', '❌ Fail');
+                }
+            } catch (error) {
+                showResult('kv-result', `Error: ${error.message}\n\nStack: ${error.stack}`, 'error');
+                updateStatus('kv-status', 'error', '❌ Error');
+            }
+        }
+        
+        async function testImageServing() {
+            showLoading('image-result');
+            updateStatus('image-status', 'warning', 'Testing...');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test-image`);
+                const data = await response.json();
+                
+                let resultText = JSON.stringify(data, null, 2);
+                
+                if (data.allObjects && data.allObjects.length > 0) {
+                    resultText += '\n\n📸 Test Image URLs:\n';
+                    data.allObjects.forEach((obj, index) => {
+                        resultText += `\n${index + 1}. ${obj.key}\n   URL: ${API_BASE_URL}${obj.url}\n   Size: ${obj.size} bytes`;
+                    });
+                }
+                
+                if (response.ok) {
+                    showResult('image-result', resultText, 'success');
+                    updateStatus('image-status', 'success', '✅ Pass');
+                } else {
+                    showResult('image-result', resultText, 'error');
+                    updateStatus('image-status', 'error', '❌ Fail');
+                }
+            } catch (error) {
+                showResult('image-result', `Error: ${error.message}\n\nStack: ${error.stack}`, 'error');
+                updateStatus('image-status', 'error', '❌ Error');
+            }
+        }
+        
+        async function runAllTests() {
+            showLoading('integration-result');
+            updateStatus('integration-status', 'warning', 'Testing...');
+            
+            const results = [];
+            
+            // Test 1: Bindings
+            try {
+                const bindingsResponse = await fetch(`${API_BASE_URL}/api/debug/bindings`);
+                const bindingsData = await bindingsResponse.json();
+                results.push({
+                    test: 'Bindings Detection',
+                    status: bindingsData.bindings.R2.includes('✅') && bindingsData.bindings.KV.includes('✅') ? '✅ PASS' : '❌ FAIL',
+                    details: bindingsData
+                });
+            } catch (error) {
+                results.push({
+                    test: 'Bindings Detection',
+                    status: '❌ ERROR',
+                    details: error.message
+                });
+            }
+            
+            // Test 2: R2 Operations
+            try {
+                const r2Response = await fetch(`${API_BASE_URL}/api/test-bindings`);
+                const r2Data = await r2Response.json();
+                results.push({
+                    test: 'R2 Operations',
+                    status: r2Data.details?.r2?.working ? '✅ PASS' : '❌ FAIL',
+                    details: r2Data
+                });
+            } catch (error) {
+                results.push({
+                    test: 'R2 Operations',
+                    status: '❌ ERROR',
+                    details: error.message
+                });
+            }
+            
+            // Test 3: KV Operations
+            try {
+                const kvResponse = await fetch(`${API_BASE_URL}/api/groups`);
+                const kvData = await kvResponse.json();
+                results.push({
+                    test: 'KV Operations',
+                    status: kvResponse.ok ? '✅ PASS' : '❌ FAIL',
+                    details: kvData
+                });
+            } catch (error) {
+                results.push({
+                    test: 'KV Operations',
+                    status: '❌ ERROR',
+                    details: error.message
+                });
+            }
+            
+            // Test 4: R2 Upload
+            try {
+                const uploadResponse = await fetch(`${API_BASE_URL}/api/test-upload`, { method: 'POST' });
+                const uploadData = await uploadResponse.json();
+                results.push({
+                    test: 'R2 Upload',
+                    status: uploadData.success ? '✅ PASS' : '❌ FAIL',
+                    details: uploadData
+                });
+            } catch (error) {
+                results.push({
+                    test: 'R2 Upload',
+                    status: '❌ ERROR',
+                    details: error.message
+                });
+            }
+            
+            // Compile results
+            const allPassed = results.every(r => r.status.includes('✅'));
+            const resultText = results.map(r => 
+                `${r.test}: ${r.status}\n${JSON.stringify(r.details, null, 2)}`
+            ).join('\n\n' + '='.repeat(50) + '\n\n');
+            
+            const summary = `\n\n${'='.repeat(50)}\nSUMMARY\n${'='.repeat(50)}\n` +
+                `Total Tests: ${results.length}\n` +
+                `Passed: ${results.filter(r => r.status.includes('✅')).length}\n` +
+                `Failed: ${results.filter(r => r.status.includes('❌')).length}\n` +
+                `Overall: ${allPassed ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}\n`;
+            
+            showResult('integration-result', resultText + summary, allPassed ? 'success' : 'error');
+            updateStatus('integration-status', allPassed ? 'success' : 'error', allPassed ? '✅ Pass' : '❌ Fail');
+        }
+        
+        // Auto-run bindings test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testBindings();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+

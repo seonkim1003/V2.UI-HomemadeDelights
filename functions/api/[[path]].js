@@ -4,28 +4,47 @@
 // Helper function to detect R2 binding (handles different naming conventions)
 function getR2Binding(env) {
   // Try exact match first
-  if (env.GALLERY_R2) return env.GALLERY_R2;
+  if (env.GALLERY_R2) {
+    console.log('✅ Found R2 binding: GALLERY_R2');
+    return env.GALLERY_R2;
+  }
   
   // Try case variations
-  if (env.gallery_r2) return env.gallery_r2;
-  if (env.Gallery_R2) return env.Gallery_R2;
-  if (env.gallery_R2) return env.gallery_R2;
+  if (env.gallery_r2) {
+    console.log('✅ Found R2 binding: gallery_r2');
+    return env.gallery_r2;
+  }
+  if (env.Gallery_R2) {
+    console.log('✅ Found R2 binding: Gallery_R2');
+    return env.Gallery_R2;
+  }
+  if (env.gallery_R2) {
+    console.log('✅ Found R2 binding: gallery_R2');
+    return env.gallery_R2;
+  }
+  
+  // Try bucket name directly (common in Cloudflare Pages)
+  if (env['gallery-images']) {
+    console.log('✅ Found R2 binding: gallery-images (bucket name)');
+    return env['gallery-images'];
+  }
   
   // Search for any R2-related binding
   const allEnvKeys = Object.keys(env);
   const r2Keys = allEnvKeys.filter(key => {
     const lower = key.toLowerCase();
-    return (lower.includes('r2') || lower.includes('gallery') || lower.includes('bucket')) &&
-           typeof env[key] === 'object' && 
-           env[key] !== null &&
-           ('put' in env[key] || 'get' in env[key]);
+    const isR2Like = (lower.includes('r2') || lower.includes('gallery') || lower.includes('bucket'));
+    const isObject = typeof env[key] === 'object' && env[key] !== null;
+    const hasR2Methods = ('put' in env[key] || 'get' in env[key] || 'list' in env[key]);
+    return isR2Like && isObject && hasR2Methods;
   });
   
   if (r2Keys.length > 0) {
-    console.log('Found R2 binding with name:', r2Keys[0]);
+    console.log('✅ Found R2 binding with name:', r2Keys[0]);
     return env[r2Keys[0]];
   }
   
+  console.warn('⚠️ No R2 binding found. Available keys:', allEnvKeys);
   return null;
 }
 
@@ -133,6 +152,11 @@ export async function onRequest(context) {
   // Test image endpoint - list first image and try to serve it
   if (path === '/api/test-image' && request.method === 'GET') {
     return handleTestImage(GALLERY_R2, corsHeaders);
+  }
+
+  // Test upload endpoint - test R2 upload with a small test file
+  if (path === '/api/test-upload' && request.method === 'POST') {
+    return handleTestUpload(request, GALLERY_R2, corsHeaders);
   }
 
   return new Response('Not Found', { status: 404, headers: corsHeaders });
@@ -265,14 +289,16 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
     if (!r2Binding) {
       return new Response(JSON.stringify({ 
         error: 'R2 bucket binding not configured.',
-        details: 'Please configure GALLERY_R2 binding in Cloudflare Pages Settings → Functions.',
+        details: 'Please configure R2 binding in Cloudflare Pages Settings → Functions.',
         troubleshooting: [
           '1. Go to Pages → Settings → Functions → Bindings',
-          '2. Add R2 Bucket binding with variable name: GALLERY_R2 (must be exact, all caps)',
+          '2. Add R2 Bucket binding with variable name: GALLERY_R2 (or gallery-images)',
           '3. Select bucket: gallery-images',
           '4. Save and REDEPLOY (retry deployment or push new commit)',
           '5. Bindings only work after redeployment!'
-        ]
+        ],
+        availableKeys: allEnvKeys,
+        hint: 'The binding name can be GALLERY_R2, gallery-images, or any name containing "gallery" or "r2"'
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -372,8 +398,8 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       const uniqueSuffix = Date.now() + '-' + i + '-' + Math.round(Math.random() * 1E9);
       const ext = file.name.split('.').pop() || 'jpg';
       const imageName = `image-${uniqueSuffix}.${ext}`;
-      // Store in R2 with gallery-images/ directory prefix (matches bucket structure)
-      const r2Key = `gallery-images/${imageName}`;
+      // Store in R2 with gallery-images/gallery-image/ directory structure
+      const r2Key = `gallery-images/gallery-image/${imageName}`;
 
       // Upload to R2
       try {
@@ -410,6 +436,7 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
         
         // Upload to R2 - R2 accepts ArrayBuffer, ReadableStream, or Blob
         console.log('📤 Calling R2 put for:', r2Key, 'Body type:', fileBody instanceof ArrayBuffer ? 'ArrayBuffer' : typeof fileBody, 'Size:', fileBody instanceof ArrayBuffer ? fileBody.byteLength : 'unknown');
+        console.log('📤 R2 binding type:', typeof r2Binding, 'Has put:', typeof r2Binding?.put, 'Has get:', typeof r2Binding?.get);
         
         // Ensure we're uploading the correct data type
         let uploadBody = fileBody;
@@ -429,12 +456,16 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
           }
         }
         
+        if (!r2Binding.put || typeof r2Binding.put !== 'function') {
+          throw new Error('R2 binding does not have a put method. Binding type: ' + typeof r2Binding);
+        }
+        
         const putResult = await r2Binding.put(r2Key, uploadBody, {
           httpMetadata: {
             contentType: contentType,
           },
         });
-        console.log('✅ R2 put completed:', r2Key);
+        console.log('✅ R2 put completed:', r2Key, 'Result:', putResult);
         
         // Verify upload by trying to get it back (with a delay to ensure consistency)
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -467,7 +498,7 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
       // Store the full R2 key (with directory) in filename, and use it in the path
       const imageRecord = {
         id: imageId,
-        filename: r2Key, // Full R2 key including directory: gallery-images/image-123.jpg
+        filename: r2Key, // Full R2 key including directory: gallery-images/gallery-image/image-123.jpg
         originalName: file.name,
         path: `/api/image/${r2Key}`, // API path includes the directory
         groupId: targetGroup.id,
@@ -555,42 +586,59 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       });
     }
     
-    // The filename from URL may or may not include gallery-images/ prefix
-    // Handle both cases for backward compatibility
+    // The filename from URL should include gallery-images/gallery-image/ prefix
+    // Handle backward compatibility with old formats
     let r2Key = filename;
-    if (!filename.startsWith('gallery-images/') && !filename.startsWith('gallery-image/')) {
-      // If old format (no prefix), try with gallery-images/ prefix first
-      r2Key = `gallery-images/${filename}`;
-      console.log('🔍 Fetching image from R2 (with prefix):', r2Key);
-    } else {
-      // If it has gallery-image/ (old), update to gallery-images/
-      if (filename.startsWith('gallery-image/')) {
-        r2Key = filename.replace('gallery-image/', 'gallery-images/');
-        console.log('🔍 Updating old path to new format:', r2Key);
+    if (!filename.startsWith('gallery-images/gallery-image/')) {
+      // Try different formats for backward compatibility
+      if (filename.startsWith('gallery-images/')) {
+        // Has gallery-images/ but not the full path, add gallery-image/
+        r2Key = filename.replace(/^gallery-images\//, 'gallery-images/gallery-image/');
+        console.log('🔍 Updating path to full structure:', r2Key);
+      } else if (filename.startsWith('gallery-image/')) {
+        // Old format, update to new nested structure
+        r2Key = filename.replace(/^gallery-image\//, 'gallery-images/gallery-image/');
+        console.log('🔍 Updating old path to new nested structure:', r2Key);
       } else {
-        console.log('🔍 Fetching image from R2:', r2Key);
+        // No prefix, add the full nested structure
+        r2Key = `gallery-images/gallery-image/${filename}`;
+        console.log('🔍 Adding full nested path:', r2Key);
       }
+    } else {
+      console.log('🔍 Fetching image from R2:', r2Key);
     }
     
     let object;
     try {
       object = await r2Binding.get(r2Key);
-      // If not found with gallery-images/, try gallery-image/ (backward compatibility)
-      if (!object && filename.startsWith('gallery-images/')) {
-        const fallbackKey = filename.replace('gallery-images/', 'gallery-image/');
-        console.log('⚠️ Not found with gallery-images/, trying gallery-image/:', fallbackKey);
-        object = await r2Binding.get(fallbackKey);
-        if (object) {
-          r2Key = fallbackKey;
+      // Backward compatibility: try old formats if not found
+      if (!object) {
+        // Try gallery-images/ (without gallery-image/)
+        if (r2Key.startsWith('gallery-images/gallery-image/')) {
+          const fallbackKey = r2Key.replace('gallery-images/gallery-image/', 'gallery-images/');
+          console.log('⚠️ Not found with nested path, trying gallery-images/:', fallbackKey);
+          object = await r2Binding.get(fallbackKey);
+          if (object) {
+            r2Key = fallbackKey;
+          }
         }
-      }
-      // Also try root level as last resort
-      if (!object && (filename.startsWith('gallery-images/') || filename.startsWith('gallery-image/'))) {
-        const rootKey = filename.replace(/^gallery-images?\//, '');
-        console.log('⚠️ Not found with prefix, trying root level:', rootKey);
-        object = await r2Binding.get(rootKey);
-        if (object) {
-          r2Key = rootKey;
+        // Try gallery-image/ (old format)
+        if (!object && r2Key.includes('gallery-images/')) {
+          const fallbackKey = r2Key.replace('gallery-images/', 'gallery-image/');
+          console.log('⚠️ Not found, trying old gallery-image/ format:', fallbackKey);
+          object = await r2Binding.get(fallbackKey);
+          if (object) {
+            r2Key = fallbackKey;
+          }
+        }
+        // Try root level as last resort
+        if (!object) {
+          const rootKey = filename.split('/').pop(); // Get just the filename
+          console.log('⚠️ Not found with any prefix, trying root level:', rootKey);
+          object = await r2Binding.get(rootKey);
+          if (object) {
+            r2Key = rootKey;
+          }
         }
       }
     } catch (getError) {
@@ -913,12 +961,32 @@ async function handleTestBindings(r2Binding, kvBinding, env, corsHeaders) {
 // GET /api/debug/bindings - Debug endpoint to check bindings
 async function handleDebugBindings(r2Binding, kvBinding, env, corsHeaders) {
   const allEnvKeys = Object.keys(env);
-  const r2Bindings = allEnvKeys.filter(key => 
-    key.includes('R2') || key.includes('r2') || key.toLowerCase().includes('gallery')
-  );
-  const kvBindings = allEnvKeys.filter(key => 
-    key.includes('KV') || key.includes('kv') || key.toLowerCase().includes('gallery')
-  );
+  const r2Bindings = allEnvKeys.filter(key => {
+    const lower = key.toLowerCase();
+    return key.includes('R2') || key.includes('r2') || lower.includes('gallery') || lower.includes('bucket');
+  });
+  const kvBindings = allEnvKeys.filter(key => {
+    const lower = key.toLowerCase();
+    return key.includes('KV') || key.includes('kv') || lower.includes('gallery');
+  });
+  
+  // Check binding types
+  const r2BindingDetails = r2Bindings.map(key => ({
+    name: key,
+    type: typeof env[key],
+    hasPut: typeof env[key]?.put === 'function',
+    hasGet: typeof env[key]?.get === 'function',
+    hasList: typeof env[key]?.list === 'function',
+    isObject: typeof env[key] === 'object' && env[key] !== null
+  }));
+  
+  const kvBindingDetails = kvBindings.map(key => ({
+    name: key,
+    type: typeof env[key],
+    hasGet: typeof env[key]?.get === 'function',
+    hasPut: typeof env[key]?.put === 'function',
+    isObject: typeof env[key] === 'object' && env[key] !== null
+  }));
 
   return new Response(JSON.stringify({
     bindings: {
@@ -927,11 +995,14 @@ async function handleDebugBindings(r2Binding, kvBinding, env, corsHeaders) {
     },
     allEnvKeys: allEnvKeys,
     r2Related: r2Bindings,
+    r2Details: r2BindingDetails,
     kvRelated: kvBindings,
+    kvDetails: kvBindingDetails,
     environment: env.ENVIRONMENT || 'production',
     message: r2Binding && kvBinding 
       ? 'All bindings are detected!' 
-      : 'Some bindings are missing. Check variable names match exactly: GALLERY_R2 and GALLERY_KV'
+      : 'Some bindings are missing. Check variable names. Common names: GALLERY_R2, gallery-images, GALLERY_KV',
+    hint: 'In Cloudflare Pages, the binding name is the variable name you set in Settings → Functions → Bindings'
   }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
@@ -947,13 +1018,29 @@ async function handleTestImage(r2Binding, corsHeaders) {
       });
     }
 
-    // List objects in R2 - list from gallery-images/ directory (matches bucket URL structure)
+    // List objects in R2 - list from gallery-images/gallery-image/ directory
     const listResult = await r2Binding.list({ 
-      prefix: 'gallery-images/',
+      prefix: 'gallery-images/gallery-image/',
       limit: 10 
     });
     
     if (!listResult || !listResult.objects || listResult.objects.length === 0) {
+      // Also check gallery-images/ (without nested gallery-image/) for backward compatibility
+      const galleryImagesList = await r2Binding.list({ prefix: 'gallery-images/', limit: 10 });
+      if (galleryImagesList && galleryImagesList.objects && galleryImagesList.objects.length > 0) {
+        return new Response(JSON.stringify({
+          message: 'Found images in R2 (gallery-images/ directory - old format)',
+          totalObjects: galleryImagesList.objects.length,
+          allObjects: galleryImagesList.objects.map(obj => ({
+            key: obj.key,
+            size: obj.size,
+            url: `/api/image/${encodeURIComponent(obj.key)}`
+          }))
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
       // Also check gallery-image/ (old format) for backward compatibility
       const oldList = await r2Binding.list({ prefix: 'gallery-image/', limit: 10 });
       if (oldList && oldList.objects && oldList.objects.length > 0) {
@@ -987,7 +1074,7 @@ async function handleTestImage(r2Binding, corsHeaders) {
       }
       
       return new Response(JSON.stringify({ 
-        message: 'No images found in R2 (checked gallery-images/, gallery-image/, and root)',
+        message: 'No images found in R2 (checked gallery-images/gallery-image/, gallery-images/, gallery-image/, and root)',
         objects: []
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -997,7 +1084,7 @@ async function handleTestImage(r2Binding, corsHeaders) {
     const firstObject = listResult.objects[0];
     
     return new Response(JSON.stringify({
-      message: 'Found images in R2 (gallery-images/ directory)',
+      message: 'Found images in R2 (gallery-images/gallery-image/ directory)',
       totalObjects: listResult.objects.length,
       firstImage: {
         key: firstObject.key,
@@ -1018,6 +1105,81 @@ async function handleTestImage(r2Binding, corsHeaders) {
   } catch (error) {
     return new Response(JSON.stringify({ 
       error: 'Failed to test R2: ' + error.message,
+      stack: error.stack
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+}
+
+// POST /api/test-upload - Test R2 upload with a small test file
+async function handleTestUpload(request, r2Binding, corsHeaders) {
+  try {
+    if (!r2Binding) {
+      return new Response(JSON.stringify({ error: 'R2 binding not available' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Create a small test image (1x1 pixel PNG)
+    const testImageData = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const testImageBuffer = Uint8Array.from(atob(testImageData), c => c.charCodeAt(0));
+    
+    const testKey = `gallery-images/gallery-image/test-${Date.now()}.png`;
+    
+    console.log('🧪 Testing R2 upload with key:', testKey);
+    console.log('🧪 R2 binding type:', typeof r2Binding, 'Has put:', typeof r2Binding?.put);
+    
+    try {
+      await r2Binding.put(testKey, testImageBuffer, {
+        httpMetadata: {
+          contentType: 'image/png',
+        },
+      });
+      console.log('✅ Test upload successful');
+      
+      // Verify it was uploaded
+      await new Promise(resolve => setTimeout(resolve, 200));
+      const verify = await r2Binding.get(testKey);
+      
+      if (!verify) {
+        return new Response(JSON.stringify({ 
+          error: 'Upload succeeded but verification failed - object not found',
+          testKey: testKey
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      // Clean up test file
+      await r2Binding.delete(testKey);
+      
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'R2 upload test successful!',
+        testKey: testKey,
+        verified: true,
+        size: verify.size
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (uploadError) {
+      console.error('❌ Test upload failed:', uploadError);
+      return new Response(JSON.stringify({ 
+        error: 'R2 upload test failed: ' + uploadError.message,
+        stack: uploadError.stack,
+        testKey: testKey
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  } catch (error) {
+    return new Response(JSON.stringify({ 
+      error: 'Failed to test upload: ' + error.message,
       stack: error.stack
     }), {
       status: 500,
