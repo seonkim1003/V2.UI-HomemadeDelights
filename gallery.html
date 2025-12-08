@@ -53,8 +53,19 @@
         </div>
     </nav>
 
+    <!-- Password Protection Modal -->
+    <div class="password-modal" id="password-modal">
+        <div class="password-modal-content">
+            <h2 data-translate="Gallery Access">Gallery Access</h2>
+            <p data-translate="Please enter the password to access the gallery">Please enter the password to access the gallery</p>
+            <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
+            <p class="password-error" id="password-error" style="display: none; color: #dc3545; margin-top: 10px; font-size: 14px;"></p>
+            <button class="btn btn-primary" id="password-submit-btn" data-translate="Submit">Submit</button>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main>
+    <main id="gallery-main-content" style="display: none;">
         <section class="page-section">
             <div class="container">
                 <h2 data-translate="Our Gallery">Our Gallery</h2>

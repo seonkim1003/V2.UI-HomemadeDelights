@@ -4,7 +4,11 @@ const API_BASE_URL = window.location.origin || 'http://localhost:8788';
 
 // Upload configuration
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
-const MAX_FILES = 10; // Maximum number of files per upload
+const MAX_FILES = 100; // Maximum number of files per upload (increased from 10)
+
+// Password protection
+const GALLERY_PASSWORD = 'HDlovesSeonhoMoreThanBrandon';
+const PASSWORD_STORAGE_KEY = 'gallery_password_verified';
 
 // Global state
 let selectedFiles = [];
@@ -39,9 +43,105 @@ const newGroupRadio = document.getElementById('new-group-radio');
 const existingGroupRadio = document.getElementById('existing-group-radio');
 const groupTitleInput = document.getElementById('group-title-input');
 const existingGroupSelect = document.getElementById('existing-group-select');
+const passwordModal = document.getElementById('password-modal');
+const passwordInput = document.getElementById('password-input');
+const passwordSubmitBtn = document.getElementById('password-submit-btn');
+const passwordError = document.getElementById('password-error');
+const galleryMainContent = document.getElementById('gallery-main-content');
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
+    // Check password first
+    checkPassword();
+});
+
+// Password protection functions
+function checkPassword() {
+    // Check if password is already verified in this session
+    const isVerified = sessionStorage.getItem(PASSWORD_STORAGE_KEY) === 'true';
+    
+    if (isVerified) {
+        // Password already verified, show gallery
+        showGallery();
+    } else {
+        // Show password modal
+        showPasswordModal();
+    }
+}
+
+function showPasswordModal() {
+    if (passwordModal) {
+        passwordModal.style.display = 'flex';
+        // Focus on password input
+        if (passwordInput) {
+            setTimeout(() => passwordInput.focus(), 100);
+            
+            // Clear error message when user starts typing
+            passwordInput.addEventListener('input', () => {
+                if (passwordError) {
+                    passwordError.style.display = 'none';
+                }
+            });
+        }
+        
+        // Handle Enter key press
+        if (passwordInput) {
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    verifyPassword();
+                }
+            });
+        }
+        
+        // Handle submit button click
+        if (passwordSubmitBtn) {
+            passwordSubmitBtn.addEventListener('click', verifyPassword);
+        }
+    }
+}
+
+function verifyPassword() {
+    const enteredPassword = passwordInput ? passwordInput.value : '';
+    
+    if (enteredPassword === GALLERY_PASSWORD) {
+        // Password correct
+        sessionStorage.setItem(PASSWORD_STORAGE_KEY, 'true');
+        hidePasswordModal();
+        showGallery();
+    } else {
+        // Password incorrect
+        if (passwordError) {
+            passwordError.textContent = 'Incorrect password. Please try again.';
+            passwordError.style.display = 'block';
+        }
+        if (passwordInput) {
+            passwordInput.value = '';
+            passwordInput.focus();
+            // Add shake animation
+            passwordInput.style.animation = 'shake 0.3s ease';
+            setTimeout(() => {
+                passwordInput.style.animation = '';
+            }, 300);
+        }
+    }
+}
+
+function hidePasswordModal() {
+    if (passwordModal) {
+        passwordModal.style.display = 'none';
+    }
+}
+
+function showGallery() {
+    // Hide password modal
+    hidePasswordModal();
+    
+    // Show gallery content
+    if (galleryMainContent) {
+        galleryMainContent.style.display = 'block';
+    }
+    
+    // Initialize gallery functionality
     setupUploadArea();
     setupGroupSelection();
     loadGalleryGroups();
@@ -56,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Debug: Check bindings on load (remove in production)
     checkBindings();
-});
+}
 
 // Debug function to check bindings
 async function checkBindings() {
