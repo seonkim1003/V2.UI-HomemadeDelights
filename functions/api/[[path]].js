@@ -552,11 +552,23 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       });
     }
     
-    console.log('Fetching image from R2:', filename);
-    const object = await r2Binding.get(filename);
+    console.log('🔍 Fetching image from R2:', filename);
+    let object;
+    try {
+      object = await r2Binding.get(filename);
+    } catch (getError) {
+      console.error('❌ Error getting object from R2:', getError);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to retrieve image from R2: ' + getError.message,
+        filename: filename
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     
     if (!object) {
-      console.warn('Image not found in R2:', filename);
+      console.warn('⚠️ Image not found in R2:', filename);
       return new Response('Image not found', {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
@@ -615,21 +627,48 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       });
     }
     
-    // Check if body is a ReadableStream
-    if (!(object.body instanceof ReadableStream)) {
-      console.error('❌ Object body is not a ReadableStream:', typeof object.body);
-      return new Response('Invalid image data format', {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
-      });
+    // R2 object.body can be a ReadableStream or other stream-like object
+    // Check if it's a stream-like object (has methods like getReader, etc.)
+    let bodyStream = object.body;
+    
+    // If it's not a ReadableStream, try to convert it
+    if (!(bodyStream instanceof ReadableStream)) {
+      // Check if it has stream-like properties
+      if (bodyStream && typeof bodyStream.getReader === 'function') {
+        // It's stream-like, use it directly
+        console.log('Using stream-like object for:', filename);
+      } else if (bodyStream && typeof bodyStream.arrayBuffer === 'function') {
+        // It's a Blob-like object, convert to stream
+        console.log('Converting Blob-like object to stream for:', filename);
+        bodyStream = bodyStream.stream();
+      } else if (bodyStream && typeof bodyStream.stream === 'function') {
+        // It has a stream method, use it
+        console.log('Using stream() method for:', filename);
+        bodyStream = bodyStream.stream();
+      } else {
+        console.error('❌ Object body is not a valid stream:', typeof bodyStream, 'Has getReader:', typeof bodyStream?.getReader, 'Has stream:', typeof bodyStream?.stream);
+        // Try to use it anyway - Response constructor might handle it
+        console.warn('⚠️ Attempting to use body as-is despite type check');
+      }
     }
     
     // Return the response with the stream
-    // R2 object.body is a ReadableStream that can be passed directly to Response
-    return new Response(object.body, {
-      headers,
-      status: 200,
-    });
+    // R2 object.body should be a ReadableStream that can be passed directly to Response
+    try {
+      return new Response(bodyStream, {
+        headers,
+        status: 200,
+      });
+    } catch (responseError) {
+      console.error('❌ Error creating Response:', responseError);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to create image response: ' + responseError.message,
+        filename: filename
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
     console.error('Error retrieving image:', filename, error);
     return new Response('Failed to retrieve image: ' + error.message, {

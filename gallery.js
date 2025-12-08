@@ -65,9 +65,18 @@ async function checkBindings() {
         if (response.ok) {
             const data = await response.json();
             console.log('Bindings Status:', data);
-            if (!data.bindings.GALLERY_R2.includes('✅') || !data.bindings.GALLERY_KV.includes('✅')) {
-                console.warn('⚠️ Bindings not configured:', data);
-                console.warn('Available environment keys:', data.allEnvKeys);
+            // Check if bindings object exists and has the expected properties
+            if (data.bindings) {
+                const r2Status = data.bindings.R2 || data.bindings.GALLERY_R2 || 'Unknown';
+                const kvStatus = data.bindings.KV || data.bindings.GALLERY_KV || 'Unknown';
+                
+                if (typeof r2Status === 'string' && !r2Status.includes('✅') || 
+                    typeof kvStatus === 'string' && !kvStatus.includes('✅')) {
+                    console.warn('⚠️ Bindings not configured:', data);
+                    console.warn('Available environment keys:', data.allEnvKeys);
+                }
+            } else {
+                console.warn('⚠️ Bindings data structure unexpected:', data);
             }
         }
     } catch (error) {
