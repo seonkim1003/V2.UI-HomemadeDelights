@@ -96,7 +96,9 @@ export async function onRequest(context) {
   }
 
   if (path.startsWith('/api/image/') && request.method === 'GET') {
-    const filename = path.split('/api/image/')[1];
+    let filename = path.split('/api/image/')[1];
+    // URL decode the filename in case it contains encoded characters
+    filename = decodeURIComponent(filename);
     return handleGetImage(filename, GALLERY_R2, corsHeaders);
   }
 
@@ -355,12 +357,19 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
 
       // Upload to R2
       try {
+        // Ensure we have a valid content type
+        const contentType = file.type || 'image/jpeg';
+        console.log('Uploading to R2:', filename, 'Content-Type:', contentType);
+        
         await r2Binding.put(filename, file.stream(), {
           httpMetadata: {
-            contentType: file.type,
+            contentType: contentType,
           },
         });
+        
+        console.log('Successfully uploaded to R2:', filename);
       } catch (r2Error) {
+        console.error('R2 upload error:', r2Error);
         return new Response(JSON.stringify({ 
           error: 'Failed to upload to R2: ' + r2Error.message 
         }), {
@@ -421,32 +430,82 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
 async function handleGetImage(filename, r2Binding, corsHeaders) {
   try {
     if (!r2Binding) {
+      console.error('R2 binding not available for image:', filename);
       return new Response('R2 binding not configured', {
         status: 500,
-        headers: corsHeaders,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
       });
     }
     
+    console.log('Fetching image from R2:', filename);
     const object = await r2Binding.get(filename);
     
     if (!object) {
+      console.warn('Image not found in R2:', filename);
       return new Response('Image not found', {
         status: 404,
-        headers: corsHeaders,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
       });
     }
 
-    const headers = new Headers(corsHeaders);
-    object.writeHttpMetadata(headers);
-    headers.set('etag', object.httpEtag);
+    // Get content type from object metadata or infer from filename
+    let contentType = 'image/jpeg'; // default
+    if (object.httpMetadata && object.httpMetadata.contentType) {
+      contentType = object.httpMetadata.contentType;
+    } else {
+      // Infer from file extension
+      const ext = filename.split('.').pop()?.toLowerCase();
+      const mimeTypes = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp',
+        'svg': 'image/svg+xml'
+      };
+      contentType = mimeTypes[ext] || 'image/jpeg';
+    }
 
-    return new Response(object.body, {
+    const headers = new Headers(corsHeaders);
+    
+    // Set content type explicitly
+    headers.set('Content-Type', contentType);
+    
+    // Add cache headers for images
+    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    
+    // Write HTTP metadata if available
+    if (object.httpMetadata) {
+      object.writeHttpMetadata(headers);
+    }
+    
+    // Set ETag if available
+    if (object.httpEtag) {
+      headers.set('etag', object.httpEtag);
+    }
+
+    console.log('Serving image:', filename, 'Content-Type:', contentType);
+    
+    // Handle the object body - it should be a ReadableStream
+    // If body is null, try to get it as an array buffer
+    let body = object.body;
+    if (!body) {
+      console.warn('Object body is null, trying to read as array buffer');
+      // This shouldn't happen, but handle it gracefully
+      return new Response('Image data not available', {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+      });
+    }
+    
+    return new Response(body, {
       headers,
     });
   } catch (error) {
-    return new Response('Failed to retrieve image', {
+    console.error('Error retrieving image:', filename, error);
+    return new Response('Failed to retrieve image: ' + error.message, {
       status: 500,
-      headers: corsHeaders,
+      headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
     });
   }
 }
