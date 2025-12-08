@@ -1,0 +1,18 @@
+{
+  "name": "homemade-delights",
+  "version": "1.0.0",
+  "description": "Homemade Delights website with image gallery",
+  "main": "functions/api/[[path]].js",
+  "scripts": {
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy",
+    "r2:create": "wrangler r2 bucket create gallery-images",
+    "kv:create": "wrangler kv:namespace create GALLERY_KV"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
