@@ -407,22 +407,45 @@ async function handleUpload(request, r2Binding, kvBinding, corsHeaders) {
         }
         
         // Upload to R2 - R2 accepts ArrayBuffer, ReadableStream, or Blob
-        console.log('Calling R2 put for:', filename);
-        const putResult = await r2Binding.put(filename, fileBody, {
+        console.log('📤 Calling R2 put for:', filename, 'Body type:', fileBody instanceof ArrayBuffer ? 'ArrayBuffer' : typeof fileBody, 'Size:', fileBody instanceof ArrayBuffer ? fileBody.byteLength : 'unknown');
+        
+        // Ensure we're uploading the correct data type
+        let uploadBody = fileBody;
+        if (fileBody instanceof ArrayBuffer) {
+          // ArrayBuffer is good for R2
+          uploadBody = fileBody;
+        } else if (fileBody instanceof ReadableStream) {
+          // ReadableStream is also good
+          uploadBody = fileBody;
+        } else {
+          // Convert to ArrayBuffer if needed
+          console.warn('Converting fileBody to ArrayBuffer');
+          if (fileBody instanceof Blob) {
+            uploadBody = await fileBody.arrayBuffer();
+          } else {
+            throw new Error('Unsupported file body type: ' + typeof fileBody);
+          }
+        }
+        
+        const putResult = await r2Binding.put(filename, uploadBody, {
           httpMetadata: {
             contentType: contentType,
           },
         });
-        console.log('R2 put completed:', filename, 'Result:', putResult);
+        console.log('✅ R2 put completed:', filename);
         
-        // Verify upload by trying to get it back (with a small delay to ensure consistency)
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Verify upload by trying to get it back (with a delay to ensure consistency)
+        await new Promise(resolve => setTimeout(resolve, 200));
         const verify = await r2Binding.get(filename);
         if (!verify) {
-          console.error('Upload verification failed - object not found after upload:', filename);
+          console.error('❌ Upload verification failed - object not found after upload:', filename);
           throw new Error('Upload verification failed - file not found in R2 after upload');
         }
-        console.log('✅ Upload verified - object exists in R2:', filename, 'Size:', verify.size, 'Content-Type:', verify.httpMetadata?.contentType);
+        if (verify.size === 0) {
+          console.error('❌ Upload verification failed - file size is 0:', filename);
+          throw new Error('Upload verification failed - file size is 0');
+        }
+        console.log('✅ Upload verified - object exists in R2:', filename, 'Size:', verify.size, 'bytes', 'Content-Type:', verify.httpMetadata?.contentType || contentType);
       } catch (r2Error) {
         console.error('❌ R2 upload error for', filename, ':', r2Error);
         console.error('Error name:', r2Error.name);
@@ -568,15 +591,20 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
     // Always set Content-Type explicitly (R2 metadata might not have it)
     headers.set('Content-Type', contentType);
     
-    // Add cache headers for images
-    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    // Add cache headers for images (but allow revalidation)
+    headers.set('Cache-Control', 'public, max-age=3600, must-revalidate');
     
-    // Set ETag if available
+    // Set ETag if available for cache validation
     if (object.httpEtag) {
       headers.set('etag', object.httpEtag);
     }
+    
+    // Add content length for better browser handling
+    if (object.size) {
+      headers.set('Content-Length', object.size.toString());
+    }
 
-    console.log('✅ Serving image:', filename, 'Content-Type:', headers.get('Content-Type'), 'Size:', object.size, 'Body type:', typeof object.body);
+    console.log('✅ Serving image:', filename, 'Content-Type:', headers.get('Content-Type'), 'Size:', object.size, 'bytes', 'Body type:', typeof object.body, 'Body null?', object.body === null);
 
     // Handle the object body - R2 objects return a ReadableStream
     if (!object.body) {
@@ -587,10 +615,20 @@ async function handleGetImage(filename, r2Binding, corsHeaders) {
       });
     }
     
+    // Check if body is a ReadableStream
+    if (!(object.body instanceof ReadableStream)) {
+      console.error('❌ Object body is not a ReadableStream:', typeof object.body);
+      return new Response('Invalid image data format', {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+      });
+    }
+    
     // Return the response with the stream
     // R2 object.body is a ReadableStream that can be passed directly to Response
     return new Response(object.body, {
       headers,
+      status: 200,
     });
   } catch (error) {
     console.error('Error retrieving image:', filename, error);

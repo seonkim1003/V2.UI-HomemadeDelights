@@ -543,13 +543,33 @@ async function displayGallery() {
         }
         coverImg.alt = group.title;
         coverImg.loading = 'lazy';
+        coverImg.crossOrigin = 'anonymous'; // Help with CORS if needed
         coverImg.onerror = function() {
             console.error('❌ Failed to load image:', this.src);
             console.error('Image URL was:', this.src);
-            this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage Error%3C/text%3E%3C/svg%3E';
+            console.error('Error details:', {
+                naturalWidth: this.naturalWidth,
+                naturalHeight: this.naturalHeight,
+                complete: this.complete,
+                readyState: this.readyState
+            });
+            // Try to reload once after a delay
+            const originalSrc = this.src;
+            setTimeout(() => {
+                if (this.src === originalSrc && !originalSrc.startsWith('data:')) {
+                    console.log('Retrying image load:', originalSrc);
+                    this.src = originalSrc + '?t=' + Date.now(); // Cache bust
+                }
+            }, 1000);
+            // Fallback to placeholder
+            setTimeout(() => {
+                if (this.naturalWidth === 0) {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f0f0f0" width="400" height="400"/%3E%3Ctext fill="%23999" font-family="sans-serif" font-size="18" dy="10.5" font-weight="bold" x="50%25" y="50%25" text-anchor="middle"%3EImage Error%3C/text%3E%3C/svg%3E';
+                }
+            }, 2000);
         };
         coverImg.onload = function() {
-            console.log('✅ Successfully loaded image:', this.src);
+            console.log('✅ Successfully loaded image:', this.src, 'Dimensions:', this.naturalWidth, 'x', this.naturalHeight);
         };
 
         // Group info overlay
@@ -614,9 +634,19 @@ function updateSlideshowImage() {
     if (currentGroupImages.length === 0) return;
 
     const image = currentGroupImages[currentSlideshowIndex];
-    slideshowImage.src = `${API_BASE_URL}${image.path}`;
+    const imageUrl = `${API_BASE_URL}${image.path}`;
+    console.log('Loading slideshow image:', imageUrl);
+    slideshowImage.src = imageUrl;
     slideshowImage.alt = image.originalName || 'Gallery image';
+    slideshowImage.crossOrigin = 'anonymous'; // Help with CORS if needed
     slideshowCounter.textContent = `${currentSlideshowIndex + 1} / ${currentGroupImages.length}`;
+    
+    slideshowImage.onerror = function() {
+        console.error('❌ Failed to load slideshow image:', this.src);
+    };
+    slideshowImage.onload = function() {
+        console.log('✅ Successfully loaded slideshow image:', this.src);
+    };
 }
 
 function showNextImage() {
