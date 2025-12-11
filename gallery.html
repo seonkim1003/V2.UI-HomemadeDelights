@@ -53,27 +53,32 @@
         </div>
     </nav>
 
-    <!-- Password Protection Modal -->
-    <div class="password-modal" id="password-modal">
+    <!-- Password Protection Modal (for upload section only) -->
+    <div class="password-modal" id="password-modal" style="display: none;">
         <div class="password-modal-content">
-            <h2 data-translate="Gallery Access">Gallery Access</h2>
-            <p data-translate="Please enter the password to access the gallery">Please enter the password to access the gallery</p>
+            <h2 data-translate="Upload Access">Upload Access</h2>
+            <p data-translate="Please enter the password to upload images">Please enter the password to upload images</p>
             <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
             <p class="password-error" id="password-error" style="display: none; color: #dc3545; margin-top: 10px; font-size: 14px;"></p>
             <button class="btn btn-primary" id="password-submit-btn" data-translate="Submit">Submit</button>
+            <button class="btn btn-secondary" id="password-cancel-btn" style="margin-top: 10px;" data-translate="Cancel">Cancel</button>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main id="gallery-main-content" style="display: none;">
+    <!-- Main Content (always visible) -->
+    <main id="gallery-main-content">
         <section class="page-section">
             <div class="container">
                 <h2 data-translate="Our Gallery">Our Gallery</h2>
-                <p class="section-intro" data-translate="Share your moments with us! Upload your favorite photos and browse through our community gallery.">
-                    Share your moments with us! Upload your favorite photos and browse through our community gallery.</p>
+                <p class="section-intro" data-translate="Browse through our community gallery.">
+                    Browse through our community gallery.</p>
 
-                <!-- Upload Section -->
-                <div class="upload-section fade-in">
+                <!-- Upload Section (Password Protected) -->
+                <div class="upload-section fade-in" id="upload-section" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0;" data-translate="Upload Images">Upload Images</h3>
+                        <button class="btn btn-secondary" id="lock-upload-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Lock Upload">Lock Upload</button>
+                    </div>
                     <div class="upload-container">
                         <div class="upload-area" id="upload-area">
                             <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
@@ -128,6 +133,18 @@
                             <p class="success-message" id="success-message">✓ Upload successful! Refreshing gallery...</p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Unlock Upload Button -->
+                <div class="unlock-upload-section fade-in" id="unlock-upload-section" style="text-align: center; padding: 40px 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 30px;">
+                    <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 20px; opacity: 0.5;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 style="margin-bottom: 10px;" data-translate="Want to upload images?">Want to upload images?</h3>
+                    <p style="margin-bottom: 20px; color: #666;" data-translate="Unlock the upload section with a password">Unlock the upload section with a password</p>
+                    <button class="btn btn-primary" id="unlock-upload-btn" data-translate="Unlock Upload">Unlock Upload</button>
                 </div>
 
                 <!-- Gallery Grid -->

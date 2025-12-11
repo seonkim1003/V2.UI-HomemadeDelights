@@ -6,9 +6,9 @@ const API_BASE_URL = window.location.origin || 'http://localhost:8788';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file
 const MAX_FILES = 100; // Maximum number of files per upload (increased from 10)
 
-// Password protection
+// Password protection (for upload section only)
 const GALLERY_PASSWORD = 'HD!';
-const PASSWORD_STORAGE_KEY = 'gallery_password_verified';
+const UPLOAD_PASSWORD_STORAGE_KEY = 'upload_password_verified';
 
 // Global state
 let selectedFiles = [];
@@ -46,35 +46,74 @@ const existingGroupSelect = document.getElementById('existing-group-select');
 const passwordModal = document.getElementById('password-modal');
 const passwordInput = document.getElementById('password-input');
 const passwordSubmitBtn = document.getElementById('password-submit-btn');
+const passwordCancelBtn = document.getElementById('password-cancel-btn');
 const passwordError = document.getElementById('password-error');
 const galleryMainContent = document.getElementById('gallery-main-content');
+const uploadSection = document.getElementById('upload-section');
+const unlockUploadSection = document.getElementById('unlock-upload-section');
+const unlockUploadBtn = document.getElementById('unlock-upload-btn');
+const lockUploadBtn = document.getElementById('lock-upload-btn');
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // Check password first
-    checkPassword();
+    // Show gallery immediately (public view)
+    initializeGallery();
 });
 
-// Password protection functions
-function checkPassword() {
-    // Check if password is already verified in this session
-    const isVerified = sessionStorage.getItem(PASSWORD_STORAGE_KEY) === 'true';
-    
-    if (isVerified) {
-        // Password already verified, show gallery
-        showGallery();
-    } else {
-        // Show password modal
-        showPasswordModal();
+// Initialize gallery (public view - no password required)
+function initializeGallery() {
+    // Show gallery content immediately
+    if (galleryMainContent) {
+        galleryMainContent.style.display = 'block';
     }
+    
+    // Check if upload is already unlocked
+    const isUploadUnlocked = sessionStorage.getItem(UPLOAD_PASSWORD_STORAGE_KEY) === 'true';
+    if (isUploadUnlocked) {
+        showUploadSection();
+    } else {
+        showUnlockUploadSection();
+    }
+    
+    // Initialize gallery functionality
+    setupUploadArea();
+    setupGroupSelection();
+    loadGalleryGroups();
+    
+    // Refresh button
+    if (refreshGalleryBtn) {
+        refreshGalleryBtn.addEventListener('click', () => {
+            console.log('Manual refresh triggered');
+            loadGalleryGroups();
+        });
+    }
+    
+    // Unlock upload button
+    if (unlockUploadBtn) {
+        unlockUploadBtn.addEventListener('click', () => {
+            showPasswordModal();
+        });
+    }
+    
+    // Lock upload button
+    if (lockUploadBtn) {
+        lockUploadBtn.addEventListener('click', () => {
+            lockUploadSection();
+        });
+    }
+    
+    // Debug: Check bindings on load (remove in production)
+    checkBindings();
 }
 
+// Password protection functions (for upload section only)
 function showPasswordModal() {
     if (passwordModal) {
         passwordModal.style.display = 'flex';
         // Focus on password input
         if (passwordInput) {
             setTimeout(() => passwordInput.focus(), 100);
+            passwordInput.value = ''; // Clear previous input
             
             // Clear error message when user starts typing
             passwordInput.addEventListener('input', () => {
@@ -86,28 +125,33 @@ function showPasswordModal() {
         
         // Handle Enter key press
         if (passwordInput) {
-            passwordInput.addEventListener('keypress', (e) => {
+            passwordInput.onkeypress = (e) => {
                 if (e.key === 'Enter') {
-                    verifyPassword();
+                    verifyUploadPassword();
                 }
-            });
+            };
         }
         
         // Handle submit button click
         if (passwordSubmitBtn) {
-            passwordSubmitBtn.addEventListener('click', verifyPassword);
+            passwordSubmitBtn.onclick = verifyUploadPassword;
+        }
+        
+        // Handle cancel button click
+        if (passwordCancelBtn) {
+            passwordCancelBtn.onclick = hidePasswordModal;
         }
     }
 }
 
-function verifyPassword() {
+function verifyUploadPassword() {
     const enteredPassword = passwordInput ? passwordInput.value : '';
     
     if (enteredPassword === GALLERY_PASSWORD) {
-        // Password correct
-        sessionStorage.setItem(PASSWORD_STORAGE_KEY, 'true');
+        // Password correct - unlock upload section
+        sessionStorage.setItem(UPLOAD_PASSWORD_STORAGE_KEY, 'true');
         hidePasswordModal();
-        showGallery();
+        showUploadSection();
     } else {
         // Password incorrect
         if (passwordError) {
@@ -130,32 +174,41 @@ function hidePasswordModal() {
     if (passwordModal) {
         passwordModal.style.display = 'none';
     }
+    if (passwordInput) {
+        passwordInput.value = '';
+    }
+    if (passwordError) {
+        passwordError.style.display = 'none';
+    }
 }
 
-function showGallery() {
-    // Hide password modal
-    hidePasswordModal();
-    
-    // Show gallery content
-    if (galleryMainContent) {
-        galleryMainContent.style.display = 'block';
+function showUploadSection() {
+    // Hide unlock section
+    if (unlockUploadSection) {
+        unlockUploadSection.style.display = 'none';
     }
-    
-    // Initialize gallery functionality
-    setupUploadArea();
-    setupGroupSelection();
-    loadGalleryGroups();
-    
-    // Refresh button
-    if (refreshGalleryBtn) {
-        refreshGalleryBtn.addEventListener('click', () => {
-            console.log('Manual refresh triggered');
-            loadGalleryGroups();
-        });
+    // Show upload section
+    if (uploadSection) {
+        uploadSection.style.display = 'block';
     }
-    
-    // Debug: Check bindings on load (remove in production)
-    checkBindings();
+}
+
+function showUnlockUploadSection() {
+    // Hide upload section
+    if (uploadSection) {
+        uploadSection.style.display = 'none';
+    }
+    // Show unlock section
+    if (unlockUploadSection) {
+        unlockUploadSection.style.display = 'block';
+    }
+}
+
+function lockUploadSection() {
+    // Clear session storage
+    sessionStorage.removeItem(UPLOAD_PASSWORD_STORAGE_KEY);
+    // Show unlock section, hide upload section
+    showUnlockUploadSection();
 }
 
 // Debug function to check bindings
