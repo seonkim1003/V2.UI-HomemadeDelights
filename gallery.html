@@ -5,79 +5,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gallery - Homemade Delights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/logo.png" type="image/png">
     <script src="translations.js"></script>
 </head>
 
 <body>
-    <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html" class="nav-logo">
-            <img src="assets/logo.png" alt="Homemade Delights Logo">
-            <span data-translate="Homemade Delights">Homemade Delights</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="index.html" data-translate="Home">Home</a></li>
-            <li><a href="about.html" data-translate="About Us">About Us</a></li>
-            <li><a href="menu.html" data-translate="Menu & Donate">Menu & Donate</a></li>
-            <li><a href="gallery.html" class="active" data-translate="Gallery">Gallery</a></li>
-            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
-            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
-        </ul>
-        <div class="nav-extras">
-            <div class="language-switcher">
-                <div class="lang-dropdown">
-                    <button class="lang-btn" aria-label="Select Language">
-                        <span class="current-lang">🇺🇸 EN</span>
-                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                    <ul class="lang-menu">
-                        <li data-value="en" class="selected">🇺🇸 English</li>
-                        <li data-value="ko">🇰🇷 한국어</li>
-                    </ul>
-                </div>
-                <!-- Hidden select for JS compatibility -->
-                <select id="language-select" style="display: none;">
-                    <option value="en">English</option>
-                    <option value="ko">Korean</option>
-                </select>
-            </div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-        </div>
-    </nav>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="grain-overlay" aria-hidden="true"></div>
+    <div class="page-curtain" aria-hidden="true"></div>
 
-    <!-- Password Protection Modal (for upload section only) -->
     <div class="password-modal" id="password-modal" style="display: none;">
         <div class="password-modal-content">
             <h2 data-translate="Upload Access">Upload Access</h2>
             <p data-translate="Please enter the password to upload images">Please enter the password to upload images</p>
             <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
-            <p class="password-error" id="password-error" style="display: none; color: #dc3545; margin-top: 10px; font-size: 14px;"></p>
-            <button class="btn btn-primary" id="password-submit-btn" data-translate="Submit">Submit</button>
-            <button class="btn btn-secondary" id="password-cancel-btn" style="margin-top: 10px;" data-translate="Cancel">Cancel</button>
+            <p class="password-error" id="password-error" style="display: none;"></p>
+            <button type="button" class="btn btn-primary" id="password-submit-btn" data-translate="Submit">Submit</button>
+            <button type="button" class="btn btn-secondary" id="password-cancel-btn" style="margin-top: 10px;" data-translate="Cancel">Cancel</button>
         </div>
     </div>
 
-    <!-- Main Content (always visible) -->
-    <main id="gallery-main-content">
-        <section class="page-section">
-            <div class="container">
-                <h2 data-translate="Our Gallery">Our Gallery</h2>
-                <p class="section-intro" data-translate="Browse through our community gallery.">
-                    Browse through our community gallery.</p>
+    <div class="lang-fade-wrap" id="lang-fade-wrap">
+        <nav>
+            <a href="index.html" class="nav-logo">
+                <img src="assets/logo.png" alt="Homemade Delights Logo">
+                <span data-translate="Homemade Delights">Homemade Delights</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" data-translate="Home">Home</a></li>
+                <li><a href="about.html" class="nav-link" data-translate="About Us">About Us</a></li>
+                <li><a href="menu.html" class="nav-link" data-translate="Menu & Donate">Menu & Donate</a></li>
+                <li><a href="gallery.html" class="nav-link active" data-translate="Gallery">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link" data-translate="Contact">Contact</a></li>
+                <li><a href="join.html" class="nav-link" data-translate="Join Us">Join Us</a></li>
+                <li class="mobile-nav-social">
+                    <a href="https://www.instagram.com/homemadedelights77/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64v-3.5a6.38 6.38 0 0 0-1-.09A6.35 6.35 0 0 0 5 20.1a6.35 6.35 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+                </li>
+                <li class="mobile-lang-only">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                </li>
+            </ul>
+            <div class="nav-extras">
+                <div class="language-switcher">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                    <select id="language-select" style="display: none;" aria-hidden="true">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
+                </div>
+                <button type="button" class="nav-toggle" aria-label="toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+            </div>
+        </nav>
 
-                <!-- Upload Section (Password Protected) -->
+        <main id="gallery-main-content">
+            <button type="button" class="upload-fab" id="upload-fab" aria-controls="upload-drawer">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <span data-translate="Upload Images">Upload Photos</span>
+            </button>
+
+            <div class="upload-drawer-overlay" id="upload-drawer-overlay" aria-hidden="true"></div>
+            <div class="upload-drawer" id="upload-drawer" role="dialog" aria-label="Upload photos">
+                <div class="upload-drawer__handle" aria-hidden="true"></div>
+                <div class="upload-drawer__head">
+                    <h2 style="margin: 0; font-size: var(--text-h3);" data-translate="Upload Images">Upload</h2>
+                    <button type="button" class="close-btn" id="upload-drawer-close" aria-label="Close upload panel" style="position: relative; right: auto;">×</button>
+                </div>
+
                 <div class="upload-section fade-in" id="upload-section" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3 style="margin: 0;" data-translate="Upload Images">Upload Images</h3>
-                        <button class="btn btn-secondary" id="lock-upload-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Lock Upload">Lock Upload</button>
+                        <button type="button" class="btn btn-secondary" id="lock-upload-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Lock Upload">Lock Upload</button>
                     </div>
                     <div class="upload-container">
                         <div class="upload-area" id="upload-area">
@@ -96,11 +109,9 @@
                         <div class="preview-container" id="preview-container" style="display: none;">
                             <div class="preview-header">
                                 <h4 data-translate="Selected Images">Selected Images</h4>
-                                <button class="btn-clear" id="clear-preview" data-translate="Clear All">Clear All</button>
+                                <button type="button" class="btn-clear" id="clear-preview" data-translate="Clear All">Clear All</button>
                             </div>
                             <div class="preview-grid" id="preview-grid"></div>
-                            
-                            <!-- Group Selection -->
                             <div class="group-selection">
                                 <h4 data-translate="Add to Group">Add to Group</h4>
                                 <div class="group-options">
@@ -120,8 +131,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
-                            <button class="btn btn-primary" id="upload-btn" data-translate="Upload Images">Upload Images</button>
+                            <button type="button" class="btn btn-primary" id="upload-btn" data-translate="Upload Images">Upload Images</button>
                         </div>
                         <div class="upload-progress" id="upload-progress" style="display: none;">
                             <div class="progress-bar">
@@ -130,62 +140,66 @@
                             <p class="progress-text" id="progress-text" data-translate="Uploading...">Uploading...</p>
                         </div>
                         <div class="upload-success" id="upload-success" style="display: none;">
-                            <p class="success-message" id="success-message">✓ Upload successful! Refreshing gallery...</p>
+                            <p class="success-message" id="success-message">Upload successful! Refreshing gallery...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Unlock Upload Button -->
-                <div class="unlock-upload-section fade-in" id="unlock-upload-section" style="text-align: center; padding: 40px 20px; background: #f8f9fa; border-radius: 8px; margin-bottom: 30px;">
+                <div class="unlock-upload-section fade-in" id="unlock-upload-section" style="text-align: center; padding: 24px; background: var(--color-bg-alt); border-radius: var(--radius-md);">
                     <svg class="upload-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 20px; opacity: 0.5;">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     <h3 style="margin-bottom: 10px;" data-translate="Want to upload images?">Want to upload images?</h3>
-                    <p style="margin-bottom: 20px; color: #666;" data-translate="Unlock the upload section with a password">Unlock the upload section with a password</p>
-                    <button class="btn btn-primary" id="unlock-upload-btn" data-translate="Unlock Upload">Unlock Upload</button>
+                    <p style="margin-bottom: 20px; color: var(--color-text-muted);" data-translate="Unlock the upload section with a password">Unlock the upload section with a password</p>
+                    <button type="button" class="btn btn-primary" id="unlock-upload-btn" data-translate="Unlock Upload">Unlock Upload</button>
                 </div>
+            </div>
 
-                <!-- Gallery Grid -->
-                <div class="gallery-section fade-in">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="margin: 0;" data-translate="Community Gallery">Community Gallery</h3>
-                        <button class="btn btn-secondary" id="refresh-gallery-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Refresh">Refresh</button>
-                    </div>
-                    <div class="gallery-grid" id="gallery-grid">
-                        <div class="loading-spinner" id="loading-spinner">
-                            <div class="spinner"></div>
-                            <p data-translate="Loading images...">Loading images...</p>
+            <section class="page-section">
+                <div class="container">
+                    <h2 data-translate="Our Gallery">Our Gallery</h2>
+                    <p class="section-intro reveal-ready" data-translate="Browse through our community gallery.">
+                        Browse through our community gallery.</p>
+
+                    <div class="gallery-section fade-in">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                            <h3 style="margin: 0;" data-translate="Community Gallery">Community Gallery</h3>
+                            <button type="button" class="btn btn-secondary" id="refresh-gallery-btn" style="padding: 8px 16px; font-size: 14px;" data-translate="Refresh">Refresh</button>
+                        </div>
+                        <div class="gallery-grid gallery-masonry" id="gallery-grid">
+                            <div class="loading-spinner" id="loading-spinner">
+                                <div class="spinner"></div>
+                                <p data-translate="Loading images...">Loading images...</p>
+                            </div>
+                        </div>
+                        <div class="empty-gallery" id="empty-gallery" style="display: none;">
+                            <p data-translate="No images uploaded yet. Be the first to share!">No images uploaded yet. Be the first to share!</p>
                         </div>
                     </div>
-                    <div class="empty-gallery" id="empty-gallery" style="display: none;">
-                        <p data-translate="No images uploaded yet. Be the first to share!">No images uploaded yet. Be the first to share!</p>
-                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="slideshow-modal" id="slideshow-modal">
+            <p class="slideshow-counter" id="slideshow-counter"></p>
+            <button type="button" class="slideshow-close" id="slideshow-close" aria-label="Close slideshow">×</button>
+            <button type="button" class="slideshow-nav slideshow-prev" id="slideshow-prev" aria-label="Previous image">‹</button>
+            <button type="button" class="slideshow-nav slideshow-next" id="slideshow-next" aria-label="Next image">›</button>
+            <div class="slideshow-content">
+                <img id="slideshow-image" src="" alt="Gallery image">
+                <div class="slideshow-info">
+                    <button type="button" class="delete-image-btn" id="delete-image-btn" title="Delete this image">Delete</button>
                 </div>
             </div>
-        </section>
-    </main>
-
-    <!-- Slideshow Modal -->
-    <div class="slideshow-modal" id="slideshow-modal">
-        <button class="slideshow-close" id="slideshow-close" aria-label="Close slideshow">×</button>
-        <button class="slideshow-nav slideshow-prev" id="slideshow-prev" aria-label="Previous image">‹</button>
-        <button class="slideshow-nav slideshow-next" id="slideshow-next" aria-label="Next image">›</button>
-        <div class="slideshow-content">
-            <img id="slideshow-image" src="" alt="Gallery image">
-            <div class="slideshow-info">
-                <p class="slideshow-counter" id="slideshow-counter"></p>
-                <button class="delete-image-btn" id="delete-image-btn" title="Delete this image">🗑️ Delete</button>
-            </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer>
-        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
-            Homemade Delights - A Student-led Project of Next Generation Advocates</p>
-    </footer>
+        <footer>
+            <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
+                Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        </footer>
+    </div>
 
     <script src="script.js"></script>
     <script src="gallery.js"></script>

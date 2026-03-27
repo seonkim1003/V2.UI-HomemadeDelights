@@ -54,9 +54,34 @@ const unlockUploadSection = document.getElementById('unlock-upload-section');
 const unlockUploadBtn = document.getElementById('unlock-upload-btn');
 const lockUploadBtn = document.getElementById('lock-upload-btn');
 
+// Upload drawer
+const uploadFab = document.getElementById('upload-fab');
+const uploadDrawer = document.getElementById('upload-drawer');
+const uploadDrawerOverlay = document.getElementById('upload-drawer-overlay');
+const uploadDrawerClose = document.getElementById('upload-drawer-close');
+
+function openUploadDrawer() {
+    if (uploadDrawer && uploadDrawerOverlay) {
+        uploadDrawer.classList.add('drawer-open');
+        uploadDrawerOverlay.classList.add('is-active');
+        document.body.classList.add('body-no-scroll');
+    }
+}
+
+function closeUploadDrawer() {
+    if (uploadDrawer && uploadDrawerOverlay) {
+        uploadDrawer.classList.remove('drawer-open');
+        uploadDrawerOverlay.classList.remove('is-active');
+        document.body.classList.remove('body-no-scroll');
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    // Show gallery immediately (public view)
+    if (uploadFab) uploadFab.addEventListener('click', openUploadDrawer);
+    if (uploadDrawerClose) uploadDrawerClose.addEventListener('click', closeUploadDrawer);
+    if (uploadDrawerOverlay) uploadDrawerOverlay.addEventListener('click', closeUploadDrawer);
+
     initializeGallery();
 });
 
@@ -734,36 +759,32 @@ async function displayGallery() {
             console.log('✅ Successfully loaded image:', this.src, 'Dimensions:', this.naturalWidth, 'x', this.naturalHeight);
         };
 
-        // Group info overlay
-        const groupInfo = document.createElement('div');
-        groupInfo.className = 'group-info';
-        
-        const groupTitle = document.createElement('h4');
-        groupTitle.className = 'group-title';
-        groupTitle.textContent = group.title;
-        
-        const groupCount = document.createElement('p');
-        groupCount.className = 'group-count';
-        const imageText = groupImages.length === 1 ? 
+        const imageText = groupImages.length === 1 ?
             (document.querySelector('[data-translate="image"]')?.textContent || 'image') :
             (document.querySelector('[data-translate="images"]')?.textContent || 'images');
-        groupCount.textContent = `${groupImages.length} ${imageText}`;
+
+        const cap = document.createElement('div');
+        cap.className = 'gallery-overlay-cap';
+        cap.innerHTML = `
+            <span class="gallery-cap-line">${group.title}</span>
+            <span class="gallery-cap-meta">${groupImages.length} ${imageText}</span>
+            <svg class="gallery-cap-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M7 17L17 7M7 7h10v10" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
 
         // Delete button for group
         const deleteGroupBtn = document.createElement('button');
         deleteGroupBtn.className = 'delete-group-btn';
-        deleteGroupBtn.innerHTML = '🗑️';
+        deleteGroupBtn.type = 'button';
+        deleteGroupBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m2 0v14a2 2 0 01-2 2H8a2 2 0 01-2-2V6h12zM10 11v6M14 11v6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         deleteGroupBtn.title = 'Delete Group';
         deleteGroupBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent opening slideshow
             deleteGroup(group.id, group.title);
         });
 
-        groupInfo.appendChild(groupTitle);
-        groupInfo.appendChild(groupCount);
-        
         groupCard.appendChild(coverImg);
-        groupCard.appendChild(groupInfo);
+        groupCard.appendChild(cap);
         groupCard.appendChild(deleteGroupBtn);
 
         groupCard.addEventListener('click', () => {

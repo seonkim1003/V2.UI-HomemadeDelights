@@ -5,81 +5,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - Homemade Delights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/logo.png" type="image/png">
     <script src="translations.js"></script>
 </head>
 
 <body>
-    <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html" class="nav-logo">
-            <img src="assets/logo.png" alt="Homemade Delights Logo">
-            <span data-translate="Homemade Delights">Homemade Delights</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="index.html" data-translate="Home">Home</a></li>
-            <li><a href="about.html" data-translate="About Us">About Us</a></li>
-            <li><a href="menu.html" data-translate="Menu & Donate">Menu & Donate</a></li>
-            <li><a href="gallery.html" data-translate="Gallery">Gallery</a></li>
-            <li><a href="contact.html" class="active" data-translate="Contact">Contact</a></li>
-            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
-        </ul>
-        <div class="nav-extras">
-            <div class="language-switcher">
-                <div class="lang-dropdown">
-                    <button class="lang-btn" aria-label="Select Language">
-                        <span class="current-lang">🇺🇸 EN</span>
-                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                    <ul class="lang-menu">
-                        <li data-value="en" class="selected">🇺🇸 English</li>
-                        <li data-value="ko">🇰🇷 한국어</li>
-                    </ul>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="grain-overlay" aria-hidden="true"></div>
+    <div class="page-curtain" aria-hidden="true"></div>
+
+    <div class="lang-fade-wrap" id="lang-fade-wrap">
+        <nav>
+            <a href="index.html" class="nav-logo">
+                <img src="assets/logo.png" alt="Homemade Delights Logo">
+                <span data-translate="Homemade Delights">Homemade Delights</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" data-translate="Home">Home</a></li>
+                <li><a href="about.html" class="nav-link" data-translate="About Us">About Us</a></li>
+                <li><a href="menu.html" class="nav-link" data-translate="Menu & Donate">Menu & Donate</a></li>
+                <li><a href="gallery.html" class="nav-link" data-translate="Gallery">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link active" data-translate="Contact">Contact</a></li>
+                <li><a href="join.html" class="nav-link" data-translate="Join Us">Join Us</a></li>
+                <li class="mobile-nav-social">
+                    <a href="https://www.instagram.com/homemadedelights77/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64v-3.5a6.38 6.38 0 0 0-1-.09A6.35 6.35 0 0 0 5 20.1a6.35 6.35 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+                </li>
+                <li class="mobile-lang-only">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                </li>
+            </ul>
+            <div class="nav-extras">
+                <div class="language-switcher">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                    <select id="language-select" style="display: none;" aria-hidden="true">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
                 </div>
-                <!-- Hidden select for JS compatibility -->
-                <select id="language-select" style="display: none;">
-                    <option value="en">English</option>
-                    <option value="ko">Korean</option>
-                </select>
+                <button type="button" class="nav-toggle" aria-label="toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
             </div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-        </div>
-        .
-    </nav>
+        </nav>
 
-    <!-- Main Content -->
-    <main>
-        <section class="page-section">
-            <div class="container">
-                <h2 data-translate="Get In Touch">Get In Touch</h2>
-                <p class="section-intro"
-                    data-translate="Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you. Please fill out the form below and we'll get back to you as soon as we can!">
-                    Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you. Please
-                    fill out the form below and we'll get back to you as soon as we can!</p>
-
-                <!-- Google Form Embed Container -->
-                <div class="form-container">
-                    <iframe
-                        src="https://docs.google.com/forms/d/e/1FAIpQLSekrSGftJ4pC_YZXd_kdHTHUk5TktzyoDInhoAW95CYh04wXQ/viewform?embedded=true"
-                        frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+        <main>
+            <section class="contact-layout">
+                <div class="contact-layout__intro">
+                    <span class="tag-primary" style="display: inline-block; margin-bottom: 16px;" data-translate="GET IN TOUCH">GET IN TOUCH</span>
+                    <h1 style="font-family: var(--font-display); font-size: var(--text-display); line-height: var(--lh-tight); margin: 0 0 var(--space-4); text-align: left;">
+                        <span class="text-reveal"><span class="text-reveal__inner" data-translate="Let's Talk">Let's Talk</span></span>
+                    </h1>
+                    <p style="font-size: 1.1rem; color: var(--color-text-muted); margin: 0; text-align: left;">
+                        We'd love to hear from you</p>
+                    <div class="contact-layout__blobs" aria-hidden="true">
+                        <div class="blob blob--1"></div>
+                        <div class="blob blob--2"></div>
+                    </div>
                 </div>
+                <div>
+                    <p class="section-intro reveal-ready"
+                        data-translate="Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you. Please fill out the form below and we'll get back to you as soon as we can!"
+                        style="text-align: left; margin-bottom: var(--space-6);">
+                        Have questions, ideas for collaboration, or want to get involved? We'd love to hear from you.
+                        Please fill out the form below and we'll get back to you as soon as we can!</p>
+                    <div class="form-container form-container--editorial">
+                        <iframe
+                            src="https://docs.google.com/forms/d/e/1FAIpQLSekrSGftJ4pC_YZXd_kdHTHUk5TktzyoDInhoAW95CYh04wXQ/viewform?embedded=true"
+                            title="Contact form" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                    </div>
+                </div>
+            </section>
+        </main>
 
-            </div>
-        </section>
-    </main>
+        <footer>
+            <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
+                Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        </footer>
+    </div>
 
-    <!-- Footer -->
-    <footer>
-        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
-            Homemade Delights - A Student-led Project of Next Generation Advocates</p>
-    </footer>
     <script src="script.js"></script>
 </body>
 

@@ -5,249 +5,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - Homemade Delights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/logo.png" type="image/png">
     <script src="translations.js"></script>
 </head>
 
 <body>
-    <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html" class="nav-logo">
-            <img src="assets/logo.png" alt="Homemade Delights Logo">
-            <span data-translate="Homemade Delights">Homemade Delights</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="index.html" data-translate="Home">Home</a></li>
-            <li><a href="about.html" class="active" data-translate="About Us">About Us</a></li>
-            <li><a href="menu.html" data-translate="Menu & Donate">Menu & Donate</a></li>
-            <li><a href="gallery.html" data-translate="Gallery">Gallery</a></li>
-            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
-            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
-        </ul>
-        <div class="nav-extras">
-            <div class="language-switcher">
-                <div class="lang-dropdown">
-                    <button class="lang-btn" aria-label="Select Language">
-                        <span class="current-lang">🇺🇸 EN</span>
-                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                    <ul class="lang-menu">
-                        <li data-value="en" class="selected">🇺🇸 English</li>
-                        <li data-value="ko">🇰🇷 한국어</li>
-                    </ul>
-                </div>
-                <!-- Hidden select for JS compatibility -->
-                <select id="language-select" style="display: none;">
-                    <option value="en">English</option>
-                    <option value="ko">Korean</option>
-                </select>
-            </div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-        </div>
-    </nav>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="grain-overlay" aria-hidden="true"></div>
+    <div class="page-curtain" aria-hidden="true"></div>
 
-    <!-- Main Content -->
-    <main>
-        <!-- About Hero Section -->
-        <section class="about-hero">
-            <div class="container">
-                <h2 data-translate="OUR MISSION">OUR MISSION</h2>
-                <p
-                    data-translate="To make Mental Health support as accessible as possible and spread awareness around the globe.">
-                    To make Mental Health support as accessible as possible and spread awareness around the globe.</p>
-            </div>
-        </section>
-
-        <!-- Founder Section -->
-        <section class="page-section">
-            <div class="container founder-section">
-                <div class="founder-image">
-                    <img src="assets/team/tevyn.jpeg" alt="Tevyn Yong">
+    <div class="lang-fade-wrap" id="lang-fade-wrap">
+        <nav class="nav--dark">
+            <a href="index.html" class="nav-logo">
+                <img src="assets/logo.png" alt="Homemade Delights Logo">
+                <span data-translate="Homemade Delights">Homemade Delights</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" data-translate="Home">Home</a></li>
+                <li><a href="about.html" class="nav-link active" data-translate="About Us">About Us</a></li>
+                <li><a href="menu.html" class="nav-link" data-translate="Menu & Donate">Menu & Donate</a></li>
+                <li><a href="gallery.html" class="nav-link" data-translate="Gallery">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link" data-translate="Contact">Contact</a></li>
+                <li><a href="join.html" class="nav-link" data-translate="Join Us">Join Us</a></li>
+                <li class="mobile-nav-social">
+                    <a href="https://www.instagram.com/homemadedelights77/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64v-3.5a6.38 6.38 0 0 0-1-.09A6.35 6.35 0 0 0 5 20.1a6.35 6.35 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+                </li>
+                <li class="mobile-lang-only">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                </li>
+            </ul>
+            <div class="nav-extras">
+                <div class="language-switcher">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                    <select id="language-select" style="display: none;" aria-hidden="true">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
                 </div>
-                <div class="founder-bio">
-                    <h2 data-translate="Our Story & Founder">Our Story & Founder</h2>
-                    <h3 data-translate="Tevyn Yong">Tevyn Yong</h3>
-                    <h4 data-translate="Founder, Product Management">Founder, Product Management</h4>
-                    <p
-                        data-translate="Homemade Delights was started because when I was in middle school, I had many personal friends who struggled with mental health problems. While they were suffering, they were not able to get the help that they needed. So, Homemade Delights was created to reach out and offer support to people who are in need of it. We want to build a community where asking for help is as easy as sharing a cookie.">
-                        Homemade Delights was started because when I was in middle school, I had many personal friends
-                        who struggled with mental health problems. While they were suffering, they were not able to get
-                        the help that they needed. So, Homemade Delights was created to reach out and offer support to
-                        people who are in need of it. We want to build a community where asking for help is as easy as
-                        sharing a cookie.</p>
-                </div>
+                <button class="nav-toggle" aria-label="toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
             </div>
-        </section>
+        </nav>
 
-        <!-- Team Section -->
-        <section class="page-section alt-bg">
-            <div class="container">
-                <h2 data-translate="Meet The Team">Meet The Team</h2>
-                <div class="team-grid">
-                    <!-- Brandon Baek -->
-                    <div class="team-member" role="button" tabindex="0" aria-label="Read more about Brandon Baek">
-                        <div class="team-member-inner">
-                            <div class="team-member-front">
-                                <img src="assets/team/brandon.jpeg" alt="Brandon Baek">
-                                <h3 data-translate="Brandon Baek">Brandon Baek</h3>
-                                <h4 data-translate="Co-Founder, Marketing & Outreach">Co-Founder, Marketing & Outreach
-                                </h4>
-                                <p class="flip-instruction" data-translate="Click to read more">Click to read more</p>
+        <main>
+            <header class="page-hero-dark">
+                <div class="container">
+                    <span class="page-hero-dark__label">About</span>
+                    <h1 class="page-hero-dark__title">
+                        <span class="text-reveal"><span class="text-reveal__inner" data-translate="The Story Behind the Warmth">The Story Behind the Warmth</span></span>
+                    </h1>
+                    <p class="page-hero-dark__tag reveal-ready"
+                        data-translate="To make Mental Health support as accessible as possible and spread awareness around the globe.">
+                        To make Mental Health support as accessible as possible and spread awareness around the globe.</p>
+                </div>
+            </header>
+
+            <section class="page-section">
+                <div class="container founder-section founder-section--editorial">
+                    <div class="founder-image image-hover-wrap">
+                        <img src="assets/team/tevyn.jpeg" alt="Tevyn Yong">
+                    </div>
+                    <div class="founder-bio founder-quote-deco">
+                        <span class="tag-primary" style="display: inline-block; margin-bottom: 12px;"
+                            data-translate="Our Story & Founder">Our Story & Founder</span>
+                        <h2 class="text-reveal" style="text-align: left;"><span class="text-reveal__inner"
+                                data-translate="Tevyn Yong" style="font-size: var(--text-h2);">Tevyn Yong</span></h2>
+                        <h4 data-translate="Founder, Product Management"
+                            style="text-align: left; color: var(--color-primary);">Founder, Product Management</h4>
+                        <p data-translate="Homemade Delights was started because when I was in middle school, I had many personal friends who struggled with mental health problems. While they were suffering, they were not able to get the help that they needed. So, Homemade Delights was created to reach out and offer support to people who are in need of it. We want to build a community where asking for help is as easy as sharing a cookie."
+                            style="text-align: left; font-size: 1.1rem; line-height: var(--lh-relaxed);">
+                            Homemade Delights was started because when I was in middle school, I had many personal friends
+                            who struggled with mental health problems. While they were suffering, they were not able to get
+                            the help that they needed. So, Homemade Delights was created to reach out and offer support to
+                            people who are in need of it. We want to build a community where asking for help is as easy as
+                            sharing a cookie.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section alt-bg">
+                <div class="container">
+                    <h2 data-translate="Meet The Team">Meet The Team</h2>
+                    <div class="team-grid stagger-children">
+                        <div class="team-member reveal-ready" role="button" tabindex="0" aria-label="Read more about Brandon Baek">
+                            <div class="team-member-inner">
+                                <div class="team-member-front">
+                                    <img class="organic-photo" src="assets/team/brandon.jpeg" alt="Brandon Baek">
+                                    <div class="team-card-strip">
+                                        <h3 data-translate="Brandon Baek">Brandon Baek</h3>
+                                        <h4 data-translate="Co-Founder, Marketing & Outreach">Co-Founder, Marketing &amp; Outreach</h4>
+                                    </div>
+                                    <p class="flip-instruction" data-translate="Click to read more">Click to read more</p>
+                                </div>
+                                <div class="team-member-back">
+                                    <p data-translate="I joined HD because mental health has always seemed like a vital portion of everyone's lives that many neglect. Seeing friends, family members, and even me go through the world of mental health has really inspired me to help others.">
+                                        I joined HD because mental health has always seemed like a vital portion of
+                                        everyone's lives that many neglect. Seeing friends, family members, and even me go
+                                        through the world of mental health has really inspired me to help others.</p>
+                                    <span class="flip-back-hint">Click to flip back</span>
+                                </div>
                             </div>
-                            <div class="team-member-back">
-                                <h3 data-translate="Brandon Baek">Brandon Baek</h3>
-                                <h4 data-translate="Co-Founder, Marketing & Outreach">Co-Founder, Marketing & Outreach
-                                </h4>
-                                <p
-                                    data-translate="I joined HD because mental health has always seemed like a vital portion of everyone's lives that many neglect. Seeing friends, family members, and even me go through the world of mental health has really inspired me to help others.">
-                                    I joined HD because mental health has always seemed like a vital portion of
-                                    everyone's lives that many neglect. Seeing friends, family members, and even me go
-                                    through the world of mental health has really inspired me to help others.</p>
+                        </div>
+                        <div class="team-member reveal-ready" role="button" tabindex="0" aria-label="Read more about Seonho Kim">
+                            <div class="team-member-inner">
+                                <div class="team-member-front">
+                                    <img class="organic-photo" src="assets/team/seonho.jpeg" alt="Seonho Kim">
+                                    <div class="team-card-strip">
+                                        <h3 data-translate="Seonho Kim">Seonho Kim</h3>
+                                        <h4 data-translate="Co-Founder, Finance & Sales">Co-Founder, Finance &amp; Sales</h4>
+                                    </div>
+                                    <p class="flip-instruction" data-translate="Click to read more">Click to read more</p>
+                                </div>
+                                <div class="team-member-back">
+                                    <p data-translate="By joining HD, I wanted to learn more about causes, effects, and ways to build better mental health as I go about my life, while also moving for awareness and change in this field.">
+                                        By joining HD, I wanted to learn more about causes, effects, and ways to build
+                                        better mental health as I go about my life, while also moving for awareness and
+                                        change in this field.</p>
+                                    <span class="flip-back-hint">Click to flip back</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Seonho Kim -->
-                    <div class="team-member" role="button" tabindex="0" aria-label="Read more about Seonho Kim">
-                        <div class="team-member-inner">
-                            <div class="team-member-front">
-                                <img src="assets/team/seonho.jpeg" alt="Seonho Kim">
-                                <h3 data-translate="Seonho Kim">Seonho Kim</h3>
-                                <h4 data-translate="Co-Founder, Finance & Sales">Co-Founder, Finance & Sales</h4>
-                                <p class="flip-instruction" data-translate="Click to read more">Click to read more</p>
+                </div>
+            </section>
+
+            <section class="page-section fade-in">
+                <div class="container">
+                    <h2 data-translate="Our Journey in Photos">Our Journey in Photos</h2>
+                    <p class="section-intro" data-translate="👆 Click any photo to see it larger.">Click any photo to see it larger.</p>
+                    <div class="carousel-film reveal-ready">
+                        <div class="carousel-container">
+                            <div class="carousel-viewport">
+                                <div class="carousel-track">
+                                    <div class="carousel-slide">
+                                        <img src="assets/pictures/packingboxes.jpg" alt="Selling baked goods"
+                                            data-large-src="assets/pictures/packingboxes.jpg" data-caption="Baking for a cause.">
+                                        <figcaption data-translate="Selling baked goods">Selling baked goods</figcaption>
+                                    </div>
+                                    <div class="carousel-slide">
+                                        <img src="assets/pictures/saturdaywork.jpeg" alt="Regular meeting"
+                                            data-large-src="assets/pictures/saturdaywork.jpeg"
+                                            data-caption="Working hard at a regular Saturday work meeting.">
+                                        <figcaption data-translate="Regular meeting">Regular meeting</figcaption>
+                                    </div>
+                                    <div class="carousel-slide">
+                                        <img src="assets/pictures/surveyaward.jpg" alt="Survey award"
+                                            data-large-src="assets/pictures/surveyaward.jpg"
+                                            data-caption="Won an award for a survey competition hosted by Next Generation Advocates.">
+                                        <figcaption data-translate="Survey competition award">Survey competition award</figcaption>
+                                    </div>
+                                    <div class="carousel-slide">
+                                        <img src="assets/pictures/makingboxes.jpeg" alt="Making boxes"
+                                            data-large-src="assets/pictures/makingboxes.jpeg"
+                                            data-caption="Making boxes to pack our product.">
+                                        <figcaption data-translate="Making boxes">Making boxes</figcaption>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="team-member-back">
-                                <h3 data-translate="Seonho Kim">Seonho Kim</h3>
-                                <h4 data-translate="Co-Founder, Finance & Sales">Co-Founder, Finance & Sales</h4>
-                                <p
-                                    data-translate="By joining HD, I wanted to learn more about causes, effects, and ways to build better mental health as I go about my life, while also moving for awareness and change in this field.">
-                                    By joining HD, I wanted to learn more about causes, effects, and ways to build
-                                    better mental health as I go about my life, while also moving for awareness and
-                                    change in this field.</p>
-                            </div>
+                            <button type="button" class="carousel-button prev" aria-label="Previous image">&larr;</button>
+                            <button type="button" class="carousel-button next" aria-label="Next image">&rarr;</button>
                         </div>
                     </div>
-                    <!-- Eliana Park -->
-                    <!-- <div class="team-member" role="button" tabindex="0" aria-label="Read more about Eliana Park">
-                        <div class="team-member-inner">
-                            <div class="team-member-front">
-                                <img src="assets/team/eliana.jpeg" alt="Eliana Park">
-                                <h3>Eliana Park</h3>
-                                <h4>Team Member</h4>
-                                <p class="flip-instruction">Click to read more</p>
-                            </div>
-                            <div class="team-member-back">
-                                <h3>Eliana Park</h3>
-                                <h4>Team Member</h4>
-                                <p>I joined HD because I loved the idea of helping people struggling with mental health. I’m able to understand the importance of mental health, and I want to do my best to be able to help and spread awareness.</p>
-                            </div>
-                        </div>
-                    </div> -->
+                </div>
+            </section>
+
+            <div class="lightbox-modal" id="lightbox">
+                <div class="lightbox-content">
+                    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+                    <img src="" alt="Enlarged gallery image" class="lightbox-image" id="lightbox-image">
+                    <div class="lightbox-caption" id="lightbox-caption"></div>
+                    <button type="button" class="lightbox-prev" id="lightbox-prev" aria-label="Previous">&larr;</button>
+                    <button type="button" class="lightbox-next" id="lightbox-next" aria-label="Next">&rarr;</button>
                 </div>
             </div>
-        </section>
 
-        <!-- Carousel Section -->
-        <section class="page-section fade-in">
-            <div class="container">
-                <h2 data-translate="Our Journey in Photos">Our Journey in Photos</h2>
-                <p class="section-intro" data-translate="👆 Click any photo to see it larger.">👆 Click any photo to see
-                    it larger.</p>
-
-                <div class="carousel-container">
-                    <div class="carousel-viewport">
-                        <div class="carousel-track">
-                            <!-- Slide 1 -->
-                            <div class="carousel-slide">
-                                <img src="assets/pictures/packingboxes.jpg" alt="Selling baked goods"
-                                    data-large-src="assets/pictures/packingboxes.jpg"
-                                    data-caption="Baking for a cause.">
-                                <figcaption data-translate="Selling baked goods">Selling baked goods</figcaption>
-                            </div>
-                            <!-- Slide 2 -->
-                            <div class="carousel-slide">
-                                <img src="assets/pictures/saturdaywork.jpeg" alt="Regular meeting"
-                                    data-large-src="assets/pictures/saturdaywork.jpeg"
-                                    data-caption="Working hard at a regular Saturday work meeting.">
-                                <figcaption data-translate="Regular meeting">Regular meeting</figcaption>
-                            </div>
-                            <!-- Slide 3 -->
-                            <div class="carousel-slide">
-                                <img src="assets/pictures/surveyaward.jpg" alt="Survey award"
-                                    data-large-src="assets/pictures/surveyaward.jpg"
-                                    data-caption="Won an award for a survey competition hosted by Next Generation Advocates.">
-                                <figcaption data-translate="Survey competition award">Survey competition award
-                                </figcaption>
-                            </div>
-                            <!-- Slide 4 -->
-                            <div class="carousel-slide">
-                                <img src="assets/pictures/makingboxes.jpeg" alt="Making boxes"
-                                    data-large-src="assets/pictures/makingboxes.jpeg"
-                                    data-caption="Making boxes to pack our product.">
-                                <figcaption data-translate="Making boxes">Making boxes</figcaption>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="carousel-button prev" aria-label="Previous image">&larr;</button>
-                    <button class="carousel-button next" aria-label="Next image">&rarr;</button>
-                </div>
-
-            </div>
-        </section>
-
-        <div class="lightbox-modal" id="lightbox">
-            <div class="lightbox-content">
-                <button class="lightbox-close" id="lightbox-close">&times;</button>
-                <img src="" alt="Enlarged gallery image" class="lightbox-image" id="lightbox-image">
-                <div class="lightbox-caption" id="lightbox-caption"></div>
-                <button class="lightbox-prev" id="lightbox-prev">&larr;</button>
-                <button class="lightbox-next" id="lightbox-next">&rarr;</button>
-            </div>
-        </div>
-
-        <section class="page-section alt-bg">
-            <div class="container">
-                <div class="impact-section">
+            <section class="page-section alt-bg impact-section impact-section--tags" style="position: relative;">
+                <svg class="impact-leaf" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path fill="currentColor" d="M60 0 C90 40 110 100 60 200 C40 120 20 60 60 0z"/>
+                </svg>
+                <div class="container">
                     <h2 data-translate="How We Make an Impact">How We Make an Impact</h2>
-                    <p class="section-intro"
+                    <p class="section-intro reveal-ready"
                         data-translate="Our mission is multifaceted. We focus on direct action, education, and financial support to make the greatest possible impact on mental health awareness.">
                         Our mission is multifaceted. We focus on direct action, education, and financial support to make
                         the greatest possible impact on mental health awareness.</p>
 
-                    <h4 data-translate="Our Methods">Our Methods</h4>
-                    <ul>
-                        <li data-translate="Spreading Awareness on Mental Health">Spreading Awareness on Mental Health
-                        </li>
-                        <li data-translate="Posting Educational Social Media Content">Posting Educational Social Media
-                            Content</li>
+                    <h4 data-translate="Our Methods" style="margin-top: var(--space-8);">Our Methods</h4>
+                    <ul class="impact-tags stagger-children">
+                        <li class="reveal-ready" data-translate="Spreading Awareness on Mental Health">Spreading Awareness on Mental Health</li>
+                        <li class="reveal-ready" data-translate="Posting Educational Social Media Content">Posting Educational Social Media Content</li>
                     </ul>
 
-                    <h4 data-translate="Organizations We Support">Organizations We Support</h4>
-                    <ul>
-                        <li data-translate="Rise Above the Disorder">Rise Above the Disorder</li>
-                        <li data-translate="988 Hotline">988 Hotline</li>
-                        <li data-translate="Mental Health of America">Mental Health of America</li>
-                        <li data-translate="Our Third Place">Our Third Place</li>
-                        <li data-translate="Sunrise Counseling Community Center">Sunrise Counseling Community Center
-                        </li>
-                        <li data-translate="Miracle Mile">Miracle Mile</li>
+                    <h4 data-translate="Organizations We Support" style="margin-top: var(--space-8);">Organizations We Support</h4>
+                    <ul class="impact-tags stagger-children">
+                        <li class="reveal-ready" data-translate="Rise Above the Disorder">Rise Above the Disorder</li>
+                        <li class="reveal-ready" data-translate="988 Hotline">988 Hotline</li>
+                        <li class="reveal-ready" data-translate="Mental Health of America">Mental Health of America</li>
+                        <li class="reveal-ready" data-translate="Our Third Place">Our Third Place</li>
+                        <li class="reveal-ready" data-translate="Sunrise Counseling Community Center">Sunrise Counseling Community Center</li>
+                        <li class="reveal-ready" data-translate="Miracle Mile">Miracle Mile</li>
                     </ul>
                 </div>
-            </div>
-        </section>
-    </main>
+            </section>
+        </main>
 
-    <!-- Footer -->
-    <footer>
-        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
-            Homemade Delights - A Student-led Project of Next Generation Advocates</p>
-    </footer>
+        <footer>
+            <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
+                Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>

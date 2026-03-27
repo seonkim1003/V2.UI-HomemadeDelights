@@ -5,127 +5,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homemade Delights - Saving Lives One Pastry at a Time</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/logo.png" type="image/png">
     <script src="translations.js"></script>
 </head>
 
 <body>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="grain-overlay" aria-hidden="true"></div>
+    <div class="page-curtain" aria-hidden="true"></div>
 
-    <!-- Survey Banner -->
-    <div class="banner" id="promo-banner">
-        <p data-translate="Help us learn more about Mental Health by taking our survey!">Help us learn more about Mental
-            Health by taking our survey!
-            <a href="https://forms.gle/rzfL8eMp1WuFXgvC7" target="_blank" data-translate="Take Survey">Take Survey</a>
-        </p>
-        <button class="close-btn" id="close-banner">×</button>
-    </div>
-
-    <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html" class="nav-logo">
-            <img src="assets/logo.png" alt="Homemade Delights Logo">
-            <span data-translate="Homemade Delights">Homemade Delights</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="index.html" class="active" data-translate="Home">Home</a></li>
-            <li><a href="about.html" data-translate="About Us">About Us</a></li>
-            <li><a href="menu.html" data-translate="Menu & Donate">Menu & Donate</a></li>
-            <li><a href="gallery.html" data-translate="Gallery">Gallery</a></li>
-            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
-            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
-        </ul>
-        <div class="nav-extras">
-            <div class="language-switcher">
-                <div class="lang-dropdown">
-                    <button class="lang-btn" aria-label="Select Language">
-                        <span class="current-lang">🇺🇸 EN</span>
-                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+    <div class="lang-fade-wrap" id="lang-fade-wrap">
+        <!-- Navigation Bar -->
+        <nav>
+            <a href="index.html" class="nav-logo">
+                <img src="assets/logo.png" alt="Homemade Delights Logo">
+                <span data-translate="Homemade Delights">Homemade Delights</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active" data-translate="Home">Home</a></li>
+                <li><a href="about.html" class="nav-link" data-translate="About Us">About Us</a></li>
+                <li><a href="menu.html" class="nav-link" data-translate="Menu & Donate">Menu & Donate</a></li>
+                <li><a href="gallery.html" class="nav-link" data-translate="Gallery">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link" data-translate="Contact">Contact</a></li>
+                <li><a href="join.html" class="nav-link" data-translate="Join Us">Join Us</a></li>
+                <li class="mobile-nav-social" aria-hidden="false">
+                    <a href="https://www.instagram.com/homemadedelights77/" target="_blank" rel="noopener noreferrer"
+                        aria-label="Instagram">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                         </svg>
-                    </button>
-                    <ul class="lang-menu">
-                        <li data-value="en" class="selected">🇺🇸 English</li>
-                        <li data-value="ko">🇰🇷 한국어</li>
-                    </ul>
+                    </a>
+                    <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank"
+                        rel="noopener noreferrer" aria-label="YouTube">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank"
+                        rel="noopener noreferrer" aria-label="TikTok">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path
+                                d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64v-3.5a6.38 6.38 0 0 0-1-.09A6.35 6.35 0 0 0 5 20.1a6.35 6.35 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+                        </svg>
+                    </a>
+                </li>
+                <li class="mobile-lang-only">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                </li>
+            </ul>
+            <div class="nav-extras">
+                <div class="language-switcher">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                    <select id="language-select" style="display: none;" aria-hidden="true">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
                 </div>
-                <!-- Hidden select for JS compatibility -->
-                <select id="language-select" style="display: none;">
-                    <option value="en">English</option>
-                    <option value="ko">Korean</option>
-                </select>
+                <button class="nav-toggle" aria-label="toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
             </div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Hero Section -->
-    <header class="hero">
-        <div class="hero-overlay"></div>
-        <div class="hero-content fade-in">
-            <h1 data-translate="Saving lives one pastry at a time. 🍰">Saving lives one pastry at a time. 🍰</h1>
+        <div class="banner" id="promo-banner">
+            <p data-translate="Help us learn more about Mental Health by taking our survey!">Help us learn more about
+                Mental
+                Health by taking our survey!
+                <a href="https://forms.gle/rzfL8eMp1WuFXgvC7" target="_blank" rel="noopener noreferrer"
+                    data-translate="Take Survey">Take Survey</a>
+            </p>
+            <button class="close-btn" id="close-banner" aria-label="Dismiss survey banner">×</button>
+        </div>
+
+        <main>
+            <header class="hero-home">
+                <span class="hero-home__watermark" aria-hidden="true">HOME</span>
+                <div class="hero-home__grid">
+                    <div>
+                        <div class="reveal-ready" style="transition-delay: 100ms;">
+                            <span class="hero-home__label">Homemade Delights</span>
+                        </div>
+                        <h1 class="hero-home__headline">
+                            <span class="text-reveal">
+                                <span class="text-reveal__inner" data-translate="Making a Home for Everyone">Making a Home for Everyone</span>
+                            </span>
+                        </h1>
+                        <p class="hero-home__sub reveal-ready"
+                            data-translate="Spreading mental health awareness and supporting our community every day is our only goal."
+                            style="transition-delay: 500ms;">
+                            Spreading mental health awareness and supporting our community every day is our only goal.
+                        </p>
+                        <div class="hero-home__actions reveal-ready stagger-children" style="transition-delay: 600ms;">
+                            <a href="menu.html" class="btn btn-primary" data-translate="Donate Now">Support Us</a>
+                            <a href="about.html" class="btn btn-secondary" data-translate="Learn Our Story">Our Story</a>
+                        </div>
+                        <p class="hero-home__lang-note reveal-ready" style="transition-delay: 700ms;">Korean language
+                            available (한국어 지원)</p>
+                    </div>
+                    <div class="hero-home__visual reveal-ready" style="transition-delay: 200ms;">
+                        <div class="hero-home__blob" aria-hidden="true"></div>
+                        <div class="hero-home__clip hero-home__float image-hover-wrap">
+                            <img src="assets/team/everyone.jpeg" alt="Homemade Delights team">
+                        </div>
+                    </div>
+                </div>
+                <div class="scroll-indicator" aria-hidden="true">
+                    <span>Scroll</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </header>
+
+            <section class="page-section">
+                <div class="container">
+                    <p class="tag-primary" style="display: table; margin: 0 auto 12px;" data-translate="OUR MISSION">OUR MISSION</p>
+                    <h2>
+                        <span class="text-reveal"><span class="text-reveal__inner" data-translate="Our Sweet Mission">Our
+                                Sweet Mission</span></span>
+                    </h2>
+                    <p class="section-intro reveal-ready"
+                        data-translate="Homemade Delights began with a simple idea: to use the comfort of homemade pastries to create conversations and provide support for mental health. We are a student-led project dedicated to making support accessible and reminding everyone that they are not alone.">
+                        Homemade Delights began with a simple idea: to use the comfort of homemade pastries to create
+                        conversations and provide support for mental health. We are a student-led project dedicated to
+                        making
+                        support accessible and reminding everyone that they are not alone.
+                    </p>
+                </div>
+            </section>
+
+            <section class="impact-stats">
+                <div class="impact-stats__inner stagger-children">
+                    <div class="impact-stats__item reveal-ready">
+                        <div class="impact-stats__num" data-count-to="5">0</div>
+                        <div class="impact-stats__label">Donation Tiers</div>
+                    </div>
+                    <div class="impact-stats__item reveal-ready">
+                        <div class="impact-stats__num" data-count-to="3">0</div>
+                        <div class="impact-stats__label">Ways to Give</div>
+                    </div>
+                    <div class="impact-stats__item reveal-ready">
+                        <div class="impact-stats__num" style="font-size: 2.2rem;">Community</div>
+                        <div class="impact-stats__label">Driven</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="page-section alt-bg">
+                <div class="container">
+                    <p class="tag-primary" style="display: table; margin: 0 auto 12px;" data-translate="CONNECT">CONNECT</p>
+                    <h2>
+                        <span class="text-reveal"><span class="text-reveal__inner" data-translate="Follow Our Journey">Follow
+                                Our Journey</span></span>
+                    </h2>
+                    <p class="section-intro reveal-ready"
+                        data-translate="Stay connected with our events, new treats, and advocacy work on our social platforms.">
+                        Stay connected with our events, new treats, and advocacy work on our social platforms.</p>
+                    <div class="bento-social stagger-children">
+                        <a href="https://www.instagram.com/homemadedelights77/" target="_blank" rel="noopener noreferrer"
+                            class="bento-social__card bento-social__card--ig reveal-ready">
+                            <div class="bento-social__platform" data-translate="Instagram">Instagram</div>
+                            <p class="bento-social__desc"
+                                data-translate="Daily updates, behind-the-scenes, and community stories.">Daily updates,
+                                behind-the-scenes, and community stories.</p>
+                            <div class="bento-social__bottom">
+                                <span>@homemadedelights77</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                </svg>
+                            </div>
+                        </a>
+                        <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank"
+                            rel="noopener noreferrer" class="bento-social__card bento-social__card--yt reveal-ready">
+                            <div class="bento-social__platform" data-translate="YouTube">YouTube</div>
+                            <p class="bento-social__desc"
+                                data-translate="Watch our vlogs, event recaps, and interviews with the team.">Watch our
+                                vlogs,
+                                event recaps, and interviews with the team.</p>
+                            <div class="bento-social__bottom">
+                                <span>@homemadedelightsofficial</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                                </svg>
+                            </div>
+                        </a>
+                        <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank"
+                            rel="noopener noreferrer" class="bento-social__card bento-social__card--tt reveal-ready">
+                            <div class="bento-social__platform" data-translate="TikTok">TikTok</div>
+                            <p class="bento-social__desc"
+                                data-translate="Join us for fun videos, baking clips, and awareness challenges.">Join us
+                                for fun
+                                videos, baking clips, and awareness challenges.</p>
+                            <div class="bento-social__bottom">
+                                <span>@homemadedelights77</span>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.83 1.55V6.78a4.85 4.85 0 01-1.06-.09z"/>
+                                </svg>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
             <p
-                data-translate="Spreading mental health awareness and supporting our community every day is our only goal.">
-                Spreading mental health awareness and supporting our community every day is our only goal.</p>
-            <div class="hero-buttons">
-                <a href="menu.html" class="btn btn-primary" data-translate="Donate Now">Donate Now</a>
-                <a href="about.html" class="btn btn-secondary" data-translate="Learn Our Story">Learn Our Story</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Mission Intro Section -->
-    <section class="page-section">
-        <div class="container">
-            <h2 data-translate="Our Sweet Mission">Our Sweet Mission</h2>
-            <p class="section-intro"
-                data-translate="Homemade Delights began with a simple idea: to use the comfort of homemade pastries to create conversations and provide support for mental health. We are a student-led project dedicated to making support accessible and reminding everyone that they are not alone.">
-                Homemade Delights began with a simple idea: to use the comfort of homemade pastries to create
-                conversations and provide support for mental health. We are a student-led project dedicated to making
-                support accessible and reminding everyone that they are not alone.</p>
-        </div>
-    </section>
-
-    <!-- Socials/Links Section -->
-    <section class="page-section alt-bg fade-in">
-        <div class="container">
-            <h2 data-translate="Follow Our Journey">Follow Our Journey</h2>
-            <p class="section-intro"
-                data-translate="Stay connected with our events, new treats, and advocacy work on our social platforms.">
-                Stay connected with our events, new treats, and advocacy work on our social platforms.</p>
-            <div class="social-links">
-                <a href="https://www.instagram.com/homemadedelights77/" target="_blank" class="social-card">
-                    <img src="https://img.icons8.com/cute-clipart/64/instagram-new.png" alt="Instagram Logo" />
-                    <h3 data-translate="Instagram">Instagram</h3>
-                    <p data-translate="Daily updates, behind-the-scenes, and community stories.">Daily updates,
-                        behind-the-scenes, and community stories.</p>
-                </a>
-                <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank"
-                    class="social-card">
-                    <img src="https://img.icons8.com/fluent/48/000000/youtube-play.png" alt="YouTube Logo" />
-                    <h3 data-translate="YouTube">YouTube</h3>
-                    <p data-translate="Watch our vlogs, event recaps, and interviews with the team.">Watch our vlogs,
-                        event recaps, and interviews with the team.</p>
-                </a>
-                <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank" class="social-card">
-                    <img src="https://img.icons8.com/color/48/000000/tiktok.png" alt="TikTok Logo" />
-                    <h3 data-translate="TikTok">TikTok</h3>
-                    <p data-translate="Join us for fun videos, baking clips, and awareness challenges.">Join us for fun
-                        videos, baking clips, and awareness challenges.</p>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
-            Homemade Delights - A Student-led Project of Next Generation Advocates</p>
-    </footer>
+                data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
+                Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>

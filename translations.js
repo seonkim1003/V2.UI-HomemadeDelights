@@ -20,7 +20,7 @@ const translations = {
         "Watch our vlogs, event recaps, and interviews with the team.": "Watch our vlogs, event recaps, and interviews with the team.",
         "TikTok": "TikTok",
         "Join us for fun videos, baking clips, and awareness challenges.": "Join us for fun videos, baking clips, and awareness challenges.",
-        "© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates": "© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates",
+        "© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates": "© 2026 Homemade Delights - A Student-led Project of Next Generation Advocates",
         "Help us learn more about Mental Health by taking our survey!": "Help us learn more about Mental Health by taking our survey!",
         "Take Survey": "Take Survey",
         "OUR MISSION": "OUR MISSION",
@@ -104,7 +104,17 @@ const translations = {
         "Enter group title...": "Enter group title...",
         "Select a group...": "Select a group...",
         "image": "image",
-        "images": "images"
+        "images": "images",
+        "CONNECT": "CONNECT",
+        "GET IN TOUCH": "GET IN TOUCH",
+        "JOIN THE TEAM": "JOIN THE TEAM",
+        "Join the Family": "Join the Family",
+        "Flexible Commitment": "Flexible Commitment",
+        "Community Impact": "Community Impact",
+        "Learn &amp; Grow": "Learn & Grow",
+        "Making a Home for Everyone": "Making a Home for Everyone",
+        "The Story Behind the Warmth": "The Story Behind the Warmth",
+        "Let's Talk": "Let's Talk"
     },
     "ko": {
         "Home": "홈",
@@ -127,7 +137,7 @@ const translations = {
         "Watch our vlogs, event recaps, and interviews with the team.": "우리의 브이로그, 이벤트 요약 및 팀과의 인터뷰를 시청하세요.",
         "TikTok": "틱톡",
         "Join us for fun videos, baking clips, and awareness challenges.": "재미있는 동영상, 베이킹 클립 및 인식 챌린지에 참여하세요.",
-        "© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates": "© 2025 홈메이드 딜라이트 - 차세대 옹호자들의 학생 주도 프로젝트",
+        "© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates": "© 2026 홈메이드 딜라이트 - 차세대 옹호자들의 학생 주도 프로젝트",
         "Help us learn more about Mental Health by taking our survey!": "설문조사에 참여하여 정신 건강에 대해 더 자세히 알아보세요!",
         "Take Survey": "설문조사 참여하기",
         "OUR MISSION": "우리의 미션",
@@ -211,6 +221,16 @@ const translations = {
         "Enter group title...": "그룹 제목 입력...",
         "Select a group...": "그룹 선택...",
         "image": "이미지",
-        "images": "이미지"
+        "images": "이미지",
+        "CONNECT": "소통하기",
+        "GET IN TOUCH": "연락하기",
+        "JOIN THE TEAM": "팀에 합류하기",
+        "Join the Family": "가족이 되세요",
+        "Flexible Commitment": "유연한 참여",
+        "Community Impact": "지역 사회 영향",
+        "Learn &amp; Grow": "배우고 성장하기",
+        "Making a Home for Everyone": "모두를 위한 따뜻한 보금자리",
+        "The Story Behind the Warmth": "따뜻함 뒤에 담긴 이야기",
+        "Let's Talk": "함께 이야기해요"
     }
 };

@@ -5,142 +5,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu & Donate - Homemade Delights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/logo.png" type="image/png">
     <script src="translations.js"></script>
 </head>
 
 <body>
-    <!-- Navigation Bar -->
-    <nav>
-        <a href="index.html" class="nav-logo">
-            <img src="assets/logo.png" alt="Homemade Delights Logo">
-            <span data-translate="Homemade Delights">Homemade Delights</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="index.html" data-translate="Home">Home</a></li>
-            <li><a href="about.html" data-translate="About Us">About Us</a></li>
-            <li><a href="menu.html" class="active" data-translate="Menu & Donate">Menu & Donate</a></li>
-            <li><a href="gallery.html" data-translate="Gallery">Gallery</a></li>
-            <li><a href="contact.html" data-translate="Contact">Contact</a></li>
-            <li><a href="join.html" data-translate="Join Us">Join Us</a></li>
-        </ul>
-        <div class="nav-extras">
-            <div class="language-switcher">
-                <div class="lang-dropdown">
-                    <button class="lang-btn" aria-label="Select Language">
-                        <span class="current-lang">🇺🇸 EN</span>
-                        <svg class="arrow-icon" width="10" height="6" viewBox="0 0 10 6" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                    </button>
-                    <ul class="lang-menu">
-                        <li data-value="en" class="selected">🇺🇸 English</li>
-                        <li data-value="ko">🇰🇷 한국어</li>
-                    </ul>
-                </div>
-                <!-- Hidden select for JS compatibility -->
-                <select id="language-select" style="display: none;">
-                    <option value="en">English</option>
-                    <option value="ko">Korean</option>
-                </select>
-            </div>
-            <button class="nav-toggle" aria-label="toggle navigation">
-                <span class="hamburger"></span>
-            </button>
-        </div>
-    </nav>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+    <div class="grain-overlay" aria-hidden="true"></div>
+    <div class="page-curtain" aria-hidden="true"></div>
 
-    <!-- Main Content -->
-    <main>
-        <section class="page-section">
-            <div class="container">
-                <h2 data-translate="Donation Incentives">Donation Incentives</h2>
-                <p class="section-intro"
-                    data-translate="Support our cause and get some sweet rewards! Every donation helps us fund mental health initiatives. Your contribution makes a real difference.">
-                    Support our cause and get some sweet rewards! Every donation helps us fund mental health
-                    initiatives. Your contribution makes a real difference.</p>
-
-                <div class="menu-container">
-                    <div class="menu-header">
-                        <h3 data-translate="Menu">Menu</h3>
+    <div class="lang-fade-wrap" id="lang-fade-wrap">
+        <nav>
+            <a href="index.html" class="nav-logo">
+                <img src="assets/logo.png" alt="Homemade Delights Logo">
+                <span data-translate="Homemade Delights">Homemade Delights</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link" data-translate="Home">Home</a></li>
+                <li><a href="about.html" class="nav-link" data-translate="About Us">About Us</a></li>
+                <li><a href="menu.html" class="nav-link active" data-translate="Menu & Donate">Menu & Donate</a></li>
+                <li><a href="gallery.html" class="nav-link" data-translate="Gallery">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link" data-translate="Contact">Contact</a></li>
+                <li><a href="join.html" class="nav-link" data-translate="Join Us">Join Us</a></li>
+                <li class="mobile-nav-social">
+                    <a href="https://www.instagram.com/homemadedelights77/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                    <a href="https://youtube.com/@homemadedelightsofficial?si=bMP9PlKLEv3c594k" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                    <a href="https://www.tiktok.com/@homemadedelights77?lang=en" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64v-3.5a6.38 6.38 0 0 0-1-.09A6.35 6.35 0 0 0 5 20.1a6.35 6.35 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg></a>
+                </li>
+                <li class="mobile-lang-only">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
                     </div>
-                    <ul class="menu-list">
-                        <li class="menu-list-item">
-                            <div class="item-details">
-                                <h4 data-translate="1 Treat">1 Treat</h4>
-                                <p data-translate="One Brownie, Rice Krispy, or Cookie.">One Brownie, Rice Krispy, or
-                                    Cookie.</p>
+                </li>
+            </ul>
+            <div class="nav-extras">
+                <div class="language-switcher">
+                    <div class="lang-pill" role="group" aria-label="Language">
+                        <button type="button" class="lang-pill-btn" data-lang="en">EN</button>
+                        <button type="button" class="lang-pill-btn" data-lang="ko">KO</button>
+                    </div>
+                    <select id="language-select" style="display: none;" aria-hidden="true">
+                        <option value="en">English</option>
+                        <option value="ko">Korean</option>
+                    </select>
+                </div>
+                <button class="nav-toggle" aria-label="toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+            </div>
+        </nav>
+
+        <main>
+            <header class="menu-page-header">
+                <div class="container">
+                    <h1 class="menu-page-header__title">
+                        <span class="text-reveal"><span class="text-reveal__inner">Support Our Mission</span></span>
+                    </h1>
+                    <p class="menu-page-header__sub reveal-ready">Every contribution feeds the community</p>
+                </div>
+            </header>
+
+            <section class="page-section">
+                <div class="container">
+                    <h2 data-translate="Donation Incentives">Donation Incentives</h2>
+                    <p class="section-intro reveal-ready"
+                        data-translate="Support our cause and get some sweet rewards! Every donation helps us fund mental health initiatives. Your contribution makes a real difference.">
+                        Support our cause and get some sweet rewards! Every donation helps us fund mental health
+                        initiatives. Your contribution makes a real difference.</p>
+
+                    <div class="donation-tier-list stagger-children">
+                        <article class="donation-tier reveal-ready">
+                            <div class="donation-tier__price" data-translate="$1">$1</div>
+                            <div class="donation-tier__body">
+                                <h3 data-translate="1 Treat">1 Treat</h3>
+                                <p data-translate="One Brownie, Rice Krispy, or Cookie.">One Brownie, Rice Krispy, or Cookie.</p>
                             </div>
-                            <div class="item-price" data-translate="$1">$1</div>
-                        </li>
-                        <li class="menu-list-item">
-                            <div class="item-details">
-                                <h4 data-translate="4 Treats">4 Treats</h4>
+                            <div class="donation-tier__action">
+                                <a href="https://paypal.me/homemadedelights77" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Donate</a>
+                            </div>
+                        </article>
+                        <article class="donation-tier reveal-ready">
+                            <div class="donation-tier__price" data-translate="$3">$3</div>
+                            <div class="donation-tier__body">
+                                <h3 data-translate="4 Treats">4 Treats</h3>
                                 <p data-translate="Your choice of four treats.">Your choice of four treats.</p>
                             </div>
-                            <div class="item-price" data-translate="$3">$3</div>
-                        </li>
-                        <li class="menu-list-item">
-                            <div class="item-details">
-                                <h4 data-translate="7 Treats">7 Treats</h4>
+                            <div class="donation-tier__action">
+                                <a href="https://paypal.me/homemadedelights77" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Donate</a>
+                            </div>
+                        </article>
+                        <article class="donation-tier reveal-ready">
+                            <div class="donation-tier__price" data-translate="$5">$5</div>
+                            <div class="donation-tier__body">
+                                <h3 data-translate="7 Treats">7 Treats</h3>
                                 <p data-translate="A handful of your favorites.">A handful of your favorites.</p>
                             </div>
-                            <div class="item-price" data-translate="$5">$5</div>
-                        </li>
-                        <li class="menu-list-item">
-                            <div class="item-details">
-                                <h4 data-translate="15 Treats">15 Treats</h4>
-                                <p data-translate="Perfect for sharing with a group.">Perfect for sharing with a group.
-                                </p>
+                            <div class="donation-tier__action">
+                                <a href="https://paypal.me/homemadedelights77" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Donate</a>
                             </div>
-                            <div class="item-price" data-translate="$10">$10</div>
-                        </li>
-                        <li class="menu-list-item">
-                            <div class="item-details">
-                                <h4 data-translate="40 Treats">40 Treats</h4>
-                                <p data-translate="The ultimate care package for any event.">The ultimate care package
-                                    for any event.</p>
+                        </article>
+                        <article class="donation-tier reveal-ready" style="position: relative;">
+                            <span class="tier-badge">Most Popular</span>
+                            <div class="donation-tier__price" data-translate="$10">$10</div>
+                            <div class="donation-tier__body">
+                                <h3 data-translate="15 Treats">15 Treats</h3>
+                                <p data-translate="Perfect for sharing with a group.">Perfect for sharing with a group.</p>
                             </div>
-                            <div class="item-price" data-translate="$25">$25</div>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="donation-methods fade-in">
-                    <h3 data-translate="Ready to Donate?">Ready to Donate?</h3>
-                    <p
-                        data-translate="You can support us directly through PayPal or Venmo. Thank you for your generosity!">
-                        You can support us directly through PayPal or Venmo. Thank you for your generosity!</p>
-                    <div class="payment-buttons">
-                        <a href="https://paypal.me/homemadedelights77" target="_blank" class="btn btn-primary"
-                            data-translate="Donate via PayPal">Donate via PayPal</a>
+                            <div class="donation-tier__action">
+                                <a href="https://paypal.me/homemadedelights77" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Donate</a>
+                            </div>
+                        </article>
+                        <article class="donation-tier reveal-ready">
+                            <div class="donation-tier__price" data-translate="$25">$25</div>
+                            <div class="donation-tier__body">
+                                <h3 data-translate="40 Treats">40 Treats</h3>
+                                <p data-translate="The ultimate care package for any event.">The ultimate care package for any event.</p>
+                            </div>
+                            <div class="donation-tier__action">
+                                <a href="https://paypal.me/homemadedelights77" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Donate</a>
+                            </div>
+                        </article>
                     </div>
-                    <p class="venmo-info"><strong data-translate="Venmo:">Venmo:</strong> @dragondragonmoney</p>
-                    <p class="disclaimer"><strong data-translate="Disclaimer:">Disclaimer:</strong> All items are for
-                        in-person pickup only. We do not offer shipping at this time.</p>
-                </div>
 
-                <div class="coming-soon">
-                    <h3 data-translate="Exciting Things Are Coming!">Exciting Things Are Coming!</h3>
-                    <p
-                        data-translate="We are thrilled to announce that <strong>Homemade Delights Boxes</strong> will be launching soon! Additionally, we will be expanding our product line to include <strong>weighted plushies, blankets, and fidget toys</strong> to provide even more comfort and support. Stay tuned for more updates!">
-                        We are thrilled to announce that <strong>Homemade Delights Boxes</strong> will be launching
-                        soon! Additionally, we will be expanding our product line to include <strong>weighted plushies,
+                    <div class="donation-methods fade-in" style="margin-top: var(--space-16); background: transparent; padding: 0;">
+                        <h3 data-translate="Ready to Donate?" style="font-family: var(--font-display);">Ways to Give</h3>
+                        <p class="reveal-ready"
+                            data-translate="You can support us directly through PayPal or Venmo. Thank you for your generosity!">
+                            You can support us directly through PayPal or Venmo. Thank you for your generosity!</p>
+                        <div class="payment-row reveal-ready">
+                            <div class="payment-card payment-card--paypal">
+                                <a href="https://paypal.me/homemadedelights77" target="_blank" rel="noopener noreferrer" class="btn btn-primary" data-translate="Donate via PayPal">Donate via PayPal</a>
+                            </div>
+                            <svg class="payment-heart" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            <div class="payment-card payment-card--venmo">
+                                <strong data-translate="Venmo:">Venmo</strong>
+                                <p class="venmo-handle">@dragondragonmoney</p>
+                            </div>
+                        </div>
+                        <p class="disclaimer reveal-ready"><strong data-translate="Disclaimer:">Disclaimer:</strong> All items are for
+                            in-person pickup only. We do not offer shipping at this time.</p>
+                    </div>
+
+                    <div class="coming-soon-panel">
+                        <span class="coming-soon-panel__badge">Coming Soon</span>
+                        <h3 data-translate="Exciting Things Are Coming!">More Goods on the Way</h3>
+                        <p
+                            data-translate="We are thrilled to announce that <strong>Homemade Delights Boxes</strong> will be launching soon! Additionally, we will be expanding our product line to include <strong>weighted plushies, blankets, and fidget toys</strong> to provide even more comfort and support. Stay tuned for more updates!">
+                            We are thrilled to announce that <strong>Homemade Delights Boxes</strong> will be launching
+                            soon! Additionally, we will be expanding our product line to include <strong>weighted plushies,
                             blankets, and fidget toys</strong> to provide even more comfort and support. Stay tuned for
-                        more updates!</p>
+                            more updates!</p>
+                        <div class="coming-tags stagger-children">
+                            <span class="reveal-ready">Homemade Delights Boxes</span>
+                            <span class="reveal-ready">Weighted plushies</span>
+                            <span class="reveal-ready">Blankets</span>
+                            <span class="reveal-ready">Fidget toys</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
-    </main>
+            </section>
+        </main>
 
-    <!-- Footer -->
-    <footer>
-        <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
-            Homemade Delights - A Student-led Project of Next Generation Advocates</p>
-    </footer>
+        <footer>
+            <p data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates">© 2025
+                Homemade Delights - A Student-led Project of Next Generation Advocates</p>
+        </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>
