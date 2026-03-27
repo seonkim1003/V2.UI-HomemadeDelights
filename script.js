@@ -4,19 +4,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Page curtain (internal navigations) ---
     const curtain = document.querySelector('.page-curtain');
     function playCurtainExit() {
-        if (!curtain || reduceMotion) return;
-        curtain.classList.remove('page-curtain--enter', 'page-curtain--exit');
-        void curtain.offsetWidth;
-        curtain.classList.add('page-curtain--enter');
+        if (!curtain) return;
+        if (reduceMotion) { curtain.style.cssText = ''; return; }
+        // Curtain starts at scaleY(1) from inline HTML style — already covering page.
+        // Enable the transition (no visual change yet), then animate off in next frame.
+        curtain.style.transition = 'transform 340ms cubic-bezier(0.25, 0, 0, 1)';
         requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                curtain.classList.add('page-curtain--exit');
-                curtain.classList.remove('page-curtain--enter');
-            });
+            curtain.style.transform = 'scaleY(0)';
+            setTimeout(() => { curtain.style.cssText = ''; }, 350);
         });
     }
 
-    if (curtain && !reduceMotion) {
+    if (curtain) {
         playCurtainExit();
         document.querySelectorAll('a[href]').forEach((anchor) => {
             const href = anchor.getAttribute('href');
@@ -36,14 +35,12 @@ document.addEventListener('DOMContentLoaded', function () {
             anchor.addEventListener('click', function (e) {
                 if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
                 e.preventDefault();
-                curtain.classList.remove('page-curtain--enter', 'page-curtain--exit');
-                void curtain.offsetWidth;
-                curtain.style.transformOrigin = 'bottom';
-                curtain.style.transition = 'transform 300ms cubic-bezier(0.4, 0, 1, 1)';
-                curtain.style.transform = 'scaleY(1)';
-                setTimeout(() => {
-                    window.location.href = url;
-                }, 300);
+                // Clear any inline styles left from a previous exit, reset to CSS base.
+                curtain.style.cssText = '';
+                curtain.classList.remove('page-curtain--enter');
+                void curtain.offsetWidth; // force reflow so browser sees scaleY(0) base
+                curtain.classList.add('page-curtain--enter'); // animate in from bottom
+                setTimeout(() => { window.location.href = url; }, 280);
             });
         });
     }
@@ -61,12 +58,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const nav = document.querySelector('nav');
     const navStartedDark = nav && nav.classList.contains('nav--dark');
     const darkHero = document.querySelector('.page-hero-dark, .join-page-header');
+    let darkHeroHeight = darkHero ? darkHero.offsetHeight : 0;
+    if (darkHero) {
+        window.addEventListener('resize', () => { darkHeroHeight = darkHero.offsetHeight; }, { passive: true });
+    }
     const onNavScroll = () => {
         if (!nav) return;
         nav.classList.toggle('scrolled', window.scrollY > 80);
         if (navStartedDark && darkHero) {
-            const pastDark = window.scrollY > darkHero.offsetHeight - 80;
-            nav.classList.toggle('nav--dark', !pastDark);
+            nav.classList.toggle('nav--dark', window.scrollY <= darkHeroHeight - 80);
         }
     };
     if (nav) {

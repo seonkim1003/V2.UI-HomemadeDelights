@@ -132,23 +132,19 @@ img {
     position: fixed;
     inset: 0;
     background: var(--color-primary);
-    transform-origin: bottom;
+    transform-origin: top;
     transform: scaleY(0);
     z-index: var(--z-curtain);
     pointer-events: none;
-    transition: transform 300ms var(--ease-in-out);
-}
-
-.page-curtain.page-curtain--enter {
     transition: none;
-    transform-origin: top;
-    transform: scaleY(1);
+    will-change: transform;
 }
 
-.page-curtain.page-curtain--exit {
-    transform-origin: top;
-    transform: scaleY(0);
-    transition: transform 350ms var(--ease-out);
+/* Curtain sliding IN from bottom when user clicks a nav link */
+.page-curtain.page-curtain--enter {
+    transform-origin: bottom;
+    transform: scaleY(1);
+    transition: transform 280ms cubic-bezier(0.4, 0, 1, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
