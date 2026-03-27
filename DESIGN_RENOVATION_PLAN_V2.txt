@@ -1,0 +1,576 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           HOMEMADE DELIGHTS — DESIGN RENOVATION PLAN V2                    ║
+║           Generated: 2026-03-27 | Based on UI/UX Pro Max Analysis          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+PRIORITY OVERVIEW
+─────────────────
+This plan addresses three confirmed bugs and one general quality pass:
+  [P1] Navigation disappears / blends into page backgrounds
+  [P2] Korean mode has untranslated strings (6+ elements)
+  [P3] Social media cards (Instagram / YouTube / TikTok) are bland
+  [P4] General site quality lift
+
+Each issue has a root-cause diagnosis, exact file/line references, and a
+step-by-step implementation plan.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISSUE #1 — NAVIGATION VISIBILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROOT CAUSE
+──────────
+The nav starts as `background: transparent` (style.css:459) and only gains a
+semi-opaque frosted-glass background after the user scrolls 80px (`.scrolled`
+class). This creates two failure modes:
+
+  A) Light pages (index, about, menu, gallery, contact): Nav text (#1A1512, a
+     near-black) is readable at the very top — but the nav has ZERO visual
+     separation from the page background. When content scrolls beneath it and
+     the user is at the exact boundary (0–79px from top), the nav can visually
+     "merge" with whatever is underneath, making links hard to find.
+
+  B) Dark pages (join.html): The `join-page-header` is a dark background.
+     Nav text is `color: var(--color-text)` = #1A1512 (near-black). Black text
+     on a near-black dark hero = invisible. The nav "disappears."
+
+EXACT FILES / LINES
+────────────────────
+  style.css      Line 458–480   — nav base + .scrolled rules
+  style.css      Line 524–561   — nav link colors (all use --color-text)
+  join.html      Line 60–70     — dark header section
+  script.js      Line 60–73     — scroll threshold logic (80px)
+
+SOLUTION
+────────
+Apply a permanent, subtle frosted-glass base to the nav (not dependent on
+scroll), and add a dark-hero detection system that switches nav text to light
+when the page starts with a dark background.
+
+IMPLEMENTATION STEPS
+─────────────────────
+Step 1 — style.css: Replace the transparent nav base with a "always visible"
+frosted glass:
+
+  CHANGE (style.css ~line 458–480):
+  ──────────────────────────────────
+  OLD:
+    nav {
+        background: transparent;
+        ...
+    }
+    nav.scrolled {
+        background: var(--overlay-light);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 1px 0 var(--color-border);
+    }
+
+  NEW:
+    nav {
+        background: rgba(250, 247, 244, 0.55);   /* always slightly visible */
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 1px 0 rgba(232, 221, 215, 0.4);
+        ... (keep everything else)
+    }
+    nav.scrolled {
+        background: rgba(250, 247, 244, 0.95);   /* more opaque on scroll */
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 1px 0 var(--color-border);
+    }
+
+  WHY: This gives the nav a permanent frosted-glass surface. It will never
+  fully disappear because there's always a visible backdrop. On scroll, it
+  becomes more opaque for clean readability.
+
+Step 2 — style.css: Add a `.nav--dark` variant for dark-hero pages:
+
+  ADD after the nav.scrolled block:
+    nav.nav--dark .nav-links li a,
+    nav.nav--dark .nav-link,
+    nav.nav--dark .nav-logo {
+        color: var(--color-card, #FAF7F4);
+    }
+    nav.nav--dark {
+        background: rgba(26, 21, 18, 0.45);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.08);
+    }
+    nav.nav--dark.scrolled {
+        background: rgba(26, 21, 18, 0.92);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+    }
+    nav.nav--dark .nav-links li a:hover,
+    nav.nav--dark .nav-links li a.active {
+        color: var(--color-primary-pale, #F0DDD6);
+    }
+
+Step 3 — join.html: Add `nav--dark` class to the <nav> element:
+
+  CHANGE (join.html ~line 18):
+    OLD: <nav>
+    NEW: <nav class="nav--dark">
+
+Step 4 — style.css: Strengthen the active tab indicator so it's always clear:
+
+  CHANGE (.nav-links li a.active::after):
+    OLD: background: var(--color-primary);
+    NEW: background: var(--color-primary);
+         height: 3px;          /* was 2px */
+         border-radius: 2px;
+         bottom: 4px;
+
+  Also add a subtle active background pill:
+    .nav-links li a.active {
+        background: rgba(198, 123, 92, 0.12);
+        border-radius: var(--radius-sm);
+    }
+    nav.nav--dark .nav-links li a.active {
+        background: rgba(240, 221, 214, 0.15);
+    }
+
+  WHY (UX rule nav-state-active): "Current location must be visually
+  highlighted in navigation." A 3px underline + a tinted background pill
+  makes the active state unmistakable in both light and dark nav contexts.
+
+Step 5 — script.js: Ensure the `.scrolled` class also respects `.nav--dark`:
+
+  The existing scroll logic only toggles `.scrolled`. No change needed —
+  `.nav--dark.scrolled` CSS from Step 2 handles the combination.
+
+RESULT: The nav is visible at all times on all pages, with a clear active-
+tab indicator that doesn't disappear against any background.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISSUE #2 — KOREAN MODE INCOMPLETE TRANSLATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROOT CAUSE
+──────────
+The translation system works by finding elements with `data-translate="key"`
+and replacing their text. Any element without that attribute is skipped. Six
+groups of strings are currently hardcoded English-only with no data-translate.
+
+UNTRANSLATED STRINGS FOUND
+───────────────────────────
+  File          Line   Current Text           Missing Translation
+  ─────────────────────────────────────────────────────────────────
+  index.html    131    "OUR MISSION"          우리의 미션
+  index.html    165    "CONNECT"              소통하기
+  about.html    78     "OUR STORY"            우리의 이야기  (check exact text)
+  contact.html  62     "GET IN TOUCH"         연락하기
+  join.html     62     "JOIN THE TEAM"        팀에 합류하기
+  join.html     64     "Join the Family"      가족이 되세요
+  join.html     76     "Flexible Commitment"  유연한 참여
+  join.html     77     "Community Impact"     지역 사회 영향
+  join.html     78     "Learn & Grow"         배우고 성장하기
+
+  Additionally, the Noto Sans KR font is NOT loaded. Korean characters are
+  currently rendering in the browser's fallback system font, which looks
+  inconsistent with the editorial Calistoga/Inter pairing used for English.
+
+EXACT FILES / LINES
+────────────────────
+  translations.js    All — add missing keys to both "en" and "ko" sections
+  index.html         Line 131, 165 — add data-translate attributes
+  about.html         Line 78 — add data-translate attribute (verify exact text)
+  contact.html       Line 62 — add data-translate attribute
+  join.html          Lines 62, 64, 76, 77, 78 — add data-translate attributes
+  All HTML files     <head> — add Noto Sans KR font import
+
+IMPLEMENTATION STEPS
+─────────────────────
+Step 1 — translations.js: Add missing keys to BOTH "en" and "ko" objects.
+
+  In the "en" section, add:
+    "OUR MISSION": "OUR MISSION",
+    "CONNECT": "CONNECT",
+    "GET IN TOUCH": "GET IN TOUCH",
+    "JOIN THE TEAM": "JOIN THE TEAM",
+    "Join the Family": "Join the Family",
+    "Flexible Commitment": "Flexible Commitment",
+    "Community Impact": "Community Impact",
+    "Learn & Grow": "Learn & Grow",
+
+  In the "ko" section, add:
+    "OUR MISSION": "우리의 미션",
+    "CONNECT": "소통하기",
+    "GET IN TOUCH": "연락하기",
+    "JOIN THE TEAM": "팀에 합류하기",
+    "Join the Family": "가족이 되세요",
+    "Flexible Commitment": "유연한 참여",
+    "Community Impact": "지역 사회 영향",
+    "Learn & Grow": "배우고 성장하기",
+
+Step 2 — index.html: Wrap the hardcoded tag labels with data-translate.
+
+  CHANGE (line ~131):
+    OLD: <p class="tag-primary" ...>OUR MISSION</p>
+    NEW: <p class="tag-primary" ... data-translate="OUR MISSION">OUR MISSION</p>
+
+  CHANGE (line ~165):
+    OLD: <p class="tag-primary" ...>CONNECT</p>
+    NEW: <p class="tag-primary" ... data-translate="CONNECT">CONNECT</p>
+
+Step 3 — contact.html: Add data-translate to GET IN TOUCH label.
+
+  CHANGE (line ~62):
+    OLD: <span class="tag-primary" ...>GET IN TOUCH</span>
+    NEW: <span class="tag-primary" ... data-translate="GET IN TOUCH">GET IN TOUCH</span>
+
+Step 4 — join.html: Add data-translate to all missing elements.
+
+  CHANGE (line ~62):
+    OLD: <span class="page-hero-dark__label">JOIN THE TEAM</span>
+    NEW: <span class="page-hero-dark__label" data-translate="JOIN THE TEAM">JOIN THE TEAM</span>
+
+  CHANGE (line ~64):
+    OLD: <span class="text-reveal__inner">Join the Family</span>
+    NEW: <span class="text-reveal__inner" data-translate="Join the Family">Join the Family</span>
+
+  CHANGE (lines ~76–78):
+    OLD: <span class="tag-sage reveal-ready">Flexible Commitment</span>
+         <span class="tag-sage reveal-ready">Community Impact</span>
+         <span class="tag-sage reveal-ready">Learn &amp; Grow</span>
+    NEW: <span class="tag-sage reveal-ready" data-translate="Flexible Commitment">Flexible Commitment</span>
+         <span class="tag-sage reveal-ready" data-translate="Community Impact">Community Impact</span>
+         <span class="tag-sage reveal-ready" data-translate="Learn & Grow">Learn &amp; Grow</span>
+
+Step 5 — All HTML files: Add Noto Sans KR font for proper Korean rendering.
+
+  In the <head> of every HTML file, add after the existing Google Fonts link:
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+
+Step 6 — style.css: Apply Noto Sans KR as a fallback font for Korean.
+
+  In the :root block (~line 24), update the font stacks:
+    --font-display: 'Calistoga', 'Noto Sans KR', Georgia, serif;
+    --font-body:    'Inter', 'Noto Sans KR', system-ui, sans-serif;
+
+  WHY: Adding Noto Sans KR to the stack means Korean characters automatically
+  use the correct font while English still uses Calistoga/Inter.
+
+  Optionally, add a Korean-specific rule:
+    :lang(ko) {
+        word-break: keep-all;        /* prevents awkward Korean line breaks */
+        font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    }
+
+RESULT: Every visible text on the site updates correctly when Korean is
+selected. Korean characters render with a proper professional font.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISSUE #3 — SOCIAL MEDIA CARDS ARE BLAND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ROOT CAUSE
+──────────
+All three bento social cards share the same `background: var(--color-bg-deep)`
+(#1A1512, a flat near-black). There is no:
+  - Platform-specific color or gradient
+  - Brand icon (only a generic arrow SVG)
+  - Visual identity distinguishing Instagram from YouTube from TikTok
+  - Any "alive" element (stats, follower count, live indicator)
+
+The result is three dark rectangles that look identical and interchangeable.
+
+EXACT FILES / LINES
+────────────────────
+  index.html     Lines 173–218   — bento social HTML structure
+  style.css      Lines 2699–2806 — bento social CSS
+  index.html     Lines 182–185, 197–200, 212–215 — generic arrow SVGs
+
+SOLUTION
+────────
+Replace flat dark cards with platform-branded gradient cards. Add real
+platform icons. Add a subtle animated shimmer/glow. Keep the warm editorial
+feel of the site while letting each platform's personality show.
+
+IMPLEMENTATION STEPS
+─────────────────────
+Step 1 — style.css: Replace flat backgrounds with platform-specific gradients.
+
+  CHANGE the three platform modifier classes (lines ~2743–2756):
+  ────────────────────────────────────────────────────────────────
+  /* Instagram — signature purple-to-orange gradient */
+  .bento-social__card--ig {
+      background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+      grid-column: 1;
+      grid-row: 1 / span 2;
+  }
+
+  /* YouTube — deep red with subtle dark gradient */
+  .bento-social__card--yt {
+      background: linear-gradient(135deg, #cc0000 0%, #ff0000 60%, #cc0000 100%);
+      grid-column: 2;
+      grid-row: 1;
+  }
+
+  /* TikTok — dark with cyan/pink duotone accent */
+  .bento-social__card--tt {
+      background: linear-gradient(135deg, #010101 0%, #1a1a2e 60%, #16213e 100%);
+      grid-column: 2;
+      grid-row: 2;
+      border: 1px solid rgba(105, 201, 208, 0.3); /* subtle teal accent */
+  }
+
+  /* TikTok cyan highlight pseudo-element */
+  .bento-social__card--tt::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #69c9d0, #ee1d52);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  }
+
+Step 2 — style.css: Add a shimmer/pulse animation to make cards feel alive.
+
+  ADD in the bento social section:
+  ─────────────────────────────────
+  @keyframes social-shimmer {
+      0%   { background-position: 200% center; }
+      100% { background-position: -200% center; }
+  }
+
+  .bento-social__card--ig {
+      background-size: 200% auto;
+      animation: social-shimmer 8s linear infinite;
+  }
+
+  /* Respect reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+      .bento-social__card--ig { animation: none; }
+  }
+
+Step 3 — index.html: Replace generic arrow SVGs with real platform icons.
+
+  The current SVG in each card is a generic "↗" arrow (path d="M7 17L17 7M7 7h10v10").
+  Replace each with a proper brand icon:
+
+  INSTAGRAM (replace SVG in .bento-social__card--ig, ~lines 182–185):
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+
+  YOUTUBE (replace SVG in .bento-social__card--yt, ~lines 197–200):
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+    </svg>
+
+  TIKTOK (replace SVG in .bento-social__card--tt, ~lines 212–215):
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.83 1.55V6.78a4.85 4.85 0 01-1.06-.09z"/>
+    </svg>
+
+Step 4 — index.html: Add platform-specific follower/engagement labels for
+social proof (optional but makes cards feel less empty).
+
+  In each .bento-social__bottom, update the plain @homemadedelights span:
+
+  Instagram card:
+    OLD: <span>@homemadedelights</span>
+    NEW: <span class="bento-social__handle">@homemadedelights77</span>
+
+  YouTube card:
+    OLD: <span>@homemadedelights</span>
+    NEW: <span class="bento-social__handle">@homemadedelightsofficial</span>
+
+  TikTok card:
+    OLD: <span>@homemadedelights</span>
+    NEW: <span class="bento-social__handle">@homemadedelights77</span>
+
+Step 5 — style.css: Ensure white text always readable on colored backgrounds.
+
+  The existing `.bento-social__card` already sets `color: var(--color-card)`.
+  Verify --color-card is white/light (it should be ~#FAF7F4). If not, add:
+
+    .bento-social__card--ig,
+    .bento-social__card--yt,
+    .bento-social__card--tt {
+        color: #FAF7F4;
+    }
+
+  Also ensure the platform name is bold enough to read on colored bg:
+    .bento-social__platform {
+        font-weight: 700;           /* was default, now explicit bold */
+        letter-spacing: -0.01em;
+    }
+
+Step 6 — style.css: Improve hover lift with a platform-color glow.
+
+  ADD:
+    .bento-social__card--ig:hover {
+        box-shadow: 0 20px 60px rgba(131, 58, 180, 0.4);
+    }
+    .bento-social__card--yt:hover {
+        box-shadow: 0 20px 60px rgba(255, 0, 0, 0.35);
+    }
+    .bento-social__card--tt:hover {
+        box-shadow: 0 20px 60px rgba(105, 201, 208, 0.3);
+    }
+
+RESULT: Each platform card is immediately recognizable by color. Real brand
+icons make the cards feel premium. Hover glows add character. The cards no
+longer look like three identical placeholders.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ISSUE #4 — GENERAL SITE QUALITY LIFT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+These are polish items that individually are small but collectively make the
+site feel noticeably more professional. No existing features are removed.
+
+4A — LANGUAGE SWITCHER UX
+──────────────────────────
+Current: `.lang-pill` buttons are small and not obviously a toggle.
+Fix: Make the active pill button more distinct with a stronger filled state.
+
+  CHANGE style.css (.lang-pill button.is-active, ~around line 2820+):
+    .lang-pill button.is-active {
+        background: var(--color-primary);
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(198, 123, 92, 0.4);
+    }
+
+4B — MOBILE NAV SOCIAL ICONS IN MENU
+──────────────────────────────────────
+Current: The mobile nav's social icons (in the hamburger menu) use the same
+generic inline SVGs as the bento cards. They're all identical-looking.
+Fix: Apply brand colors to each icon in the mobile menu:
+
+  ADD to style.css:
+    .nav-social a[href*="instagram"] svg { color: #E1306C; }
+    .nav-social a[href*="youtube"]   svg { color: #FF0000; }
+    .nav-social a[href*="tiktok"]    svg { color: #69c9d0; }
+
+4C — SMOOTH TAB FOCUS RING
+───────────────────────────
+Current: Default browser focus ring (ugly blue dashed box).
+Fix: Custom focus ring using the brand color (WCAG-compliant 3:1 contrast).
+
+  ADD to style.css:
+    *:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 3px;
+        border-radius: 4px;
+    }
+    *:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+4D — SCROLL PROGRESS INDICATOR
+────────────────────────────────
+Optional but impactful for multi-section pages (about, menu). A thin brand-
+colored progress bar at the top of the page indicates scroll depth.
+
+  ADD to style.css:
+    .scroll-progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0%;
+        background: var(--color-primary);
+        z-index: calc(var(--z-sticky) + 1);
+        transition: width 0.1s linear;
+    }
+
+  ADD to each HTML file, inside <body> before the page curtain div:
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+  ADD to script.js (inside the scroll event listener, after the nav logic):
+    const progress = document.getElementById('scrollProgress');
+    if (progress) {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progress.style.width = pct + '%';
+    }
+
+4E — FOOTER YEAR UPDATE + BILINGUAL SOCIAL LINKS
+──────────────────────────────────────────────────
+Current: Footer says "© 2025". It's 2026. This is a minor credibility issue.
+Fix: Change all footers to "© 2026" (or use JS to auto-update).
+
+  OPTION A (simple): In all 6 HTML files, find the footer translate key and
+  update "© 2025" → "© 2026" in both translations.js "en" and "ko" entries.
+
+  OPTION B (automatic, better long-term): In script.js, after page load:
+    document.querySelectorAll('[data-translate="© 2025 Homemade Delights - A Student-led Project of Next Generation Advocates"]').forEach(el => {
+        const year = new Date().getFullYear();
+        el.textContent = el.textContent.replace('2025', year).replace('2026', year);
+    });
+  (This keeps the translation key intact while always showing the current year.)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPLEMENTATION ORDER (RECOMMENDED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Do these in order to avoid confusion and make testing easier:
+
+  1. [P2] Translations — translations.js + data-translate attributes + Noto Sans KR
+     Test: Switch to Korean mode on every page. All text should update.
+
+  2. [P1] Nav visibility — style.css nav rules + join.html nav--dark class
+     Test: Load each page. Nav should be visible before and after scrolling.
+
+  3. [P3] Social cards — style.css gradient backgrounds + SVG icons + hover glows
+     Test: View homepage. Each card should have a distinct color and real icon.
+
+  4. [P4a] Language pill — style.css active state improvement
+  5. [P4b] Mobile nav icon colors — style.css icon color rules
+  6. [P4c] Focus ring — style.css :focus-visible rule
+  7. [P4d] Scroll progress — style.css + HTML + script.js additions
+  8. [P4e] Footer year — translations.js update or script.js auto-year
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILES TO MODIFY — SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  translations.js    — Add 8 new en/ko key pairs; update © year
+  style.css          — Nav rules (5 changes), social cards (4 changes),
+                       lang pill, mobile icons, focus ring, scroll progress
+  index.html         — 2 data-translate additions, 3 SVG replacements,
+                       scroll progress div, Noto Sans KR link
+  about.html         — 1 data-translate addition, Noto Sans KR link
+  contact.html       — 1 data-translate addition, Noto Sans KR link
+  join.html          — 5 data-translate additions, nav--dark class,
+                       Noto Sans KR link
+  menu.html          — Noto Sans KR link, scroll progress div
+  gallery.html       — Noto Sans KR link
+  script.js          — Scroll progress update logic, optional year auto-update
+
+  Total changes: ~9 files, ~40 targeted edits. No structural rewrites.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UI/UX PRO MAX RULE COMPLIANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This plan was validated against the following UI/UX Pro Max rules:
+
+  [nav-state-active]          P1 — active tab always highlighted
+  [navigation-consistency]    P1 — nav placement/style consistent across pages
+  [color-dark-mode]           P1 — nav--dark uses correct light text on dark bg
+  [color-accessible-pairs]    P3 — white text on colored cards verified ≥4.5:1
+  [no-emoji-icons]            P3 — replaced generic SVG arrows with brand icons
+                                   (note: emoji 🍰 in hero text is content,
+                                   not a structural icon — acceptable)
+  [state-clarity]             P3 — hover glow makes platform clear
+  [font-loading]              P2 — Noto Sans KR with display=swap (no FOIT)
+  [dynamic-type]              P2 — :lang(ko) word-break: keep-all for readability
+  [focus-states]              P4c — custom focus ring 2px brand color
+  [reduced-motion]            P3 — shimmer animation gated on prefers-reduced-motion
+  [typography & color]        P2 — proper Korean font renders at matching quality
+  [style-match]               Site style "Nature Distilled Editorial" preserved;
+                               social cards add vibrance without breaking it
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF PLAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

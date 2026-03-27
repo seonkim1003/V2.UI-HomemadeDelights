@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/super/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python scripts/search.py \"nonprofit community mental health charity warm human storytelling\" --design-system -p \"HomeMade Delights\" -f markdown)",
+      "Bash(python scripts/search.py \"organic warm handcrafted community nonprofit\" --domain style -n 5)",
+      "Bash(python scripts/search.py \"warm earthy organic community charity\" --domain color -n 5)",
+      "Bash(python scripts/search.py \"warm human storytelling editorial nonprofit\" --domain typography -n 3)",
+      "Bash(python scripts/search.py \"scroll reveal stagger fade community warmth\" --domain ux -n 5)",
+      "Bash(grep -n \"instagram\\\\|youtube\\\\|tiktok\\\\|Instagram\\\\|YouTube\\\\|TikTok\" /c/Users/super/OneDrive/Desktop/HomeMADE/HomeMadeDelights/*.html)",
+      "Bash(wc:*)",
+      "Bash(python3 \"C:/Users/super/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"food community nonprofit social media Korean bilingual warm editorial\" --design-system -p \"HomeMade Delights\" -f markdown)",
+      "Bash(py:*)"
+    ]
+  }
+}
