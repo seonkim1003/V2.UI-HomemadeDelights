@@ -10,7 +10,8 @@
       "Bash(grep -n \"instagram\\\\|youtube\\\\|tiktok\\\\|Instagram\\\\|YouTube\\\\|TikTok\" /c/Users/super/OneDrive/Desktop/HomeMADE/HomeMadeDelights/*.html)",
       "Bash(wc:*)",
       "Bash(python3 \"C:/Users/super/.claude/skills/ui-ux-pro-max/scripts/search.py\" \"food community nonprofit social media Korean bilingual warm editorial\" --design-system -p \"HomeMade Delights\" -f markdown)",
-      "Bash(py:*)"
+      "Bash(py:*)",
+      "Bash(cd:*)"
     ]
   }
 }
